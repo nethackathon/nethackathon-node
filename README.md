@@ -11,3 +11,12 @@
   - id bigint unsigned unique auto_increment not null
   - user_id bigint unsigned not null
   - data json
+
+## sokoban
+  - id bigint unsigned unique auto_increment not null
+  - user_id bigint unsigned not null
+  - turn_count int unsigned not null
+  - time_seconds int unsigned not null
+  - soko_level tinyint unsigned not null
+  - soko_sublevel tinyint unsigned not null
+  - soko_path json

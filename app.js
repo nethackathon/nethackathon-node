@@ -39,6 +39,8 @@ const defaultServerData = {
         { name: 'Warning', value: false },
     ],
     protection: 0,
+    canPray: true,
+    lastPrayed: undefined,
     notes: '',
     cha: 10,
     touristCapShirt: false
@@ -92,6 +94,56 @@ app.delete('/annotate', auth, (req, res) => {
 
 app.listen(port, () => {
     console.log(`annotate app listening at https://nethackathon.org:${port}`)
+})
+
+app.post('/annotate/sokoban', auth, (req, res) => {
+    try {
+        connection.query(`insert into sokoban (user_id, turn_count, time_seconds, soko_level, soko_sublevel, soko_path) 
+          values ( (select id from user where username = ? limit 1), ?, ?, ?, ?, ?);`,
+            [req.username, req.body.turn_count, req.body.time_seconds, req.body.soko_level, req.body.soko_sublevel, JSON.stringify(req.body.soko_path)],
+            function (error, results) {
+                if (error) throw error;
+                res.send(req.body)
+            })
+
+    } catch (err) {
+        res.status(500).send('Something went wrong!')
+        console.log(err)
+    }
+})
+
+app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
+    let soko_level = req.params.soko_level
+    let soko_sublevel = req.params.soko_sublevel
+    try {
+        connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by time_seconds limit 20;`,
+            [soko_level, soko_sublevel],
+            function (error, results) {
+                if (error) throw error;
+                res.send(results)
+            })
+
+    } catch (err) {
+        res.status(500).send('Something went wrong!')
+        console.log(err)
+    }
+})
+
+app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
+    let soko_level = req.params.soko_level
+    let soko_sublevel = req.params.soko_sublevel
+    try {
+        connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by turn_count limit 20;`,
+            [soko_level, soko_sublevel],
+            function (error, results) {
+                if (error) throw error;
+                res.send(results)
+            })
+
+    } catch (err) {
+        res.status(500).send('Something went wrong!')
+        console.log(err)
+    }
 })
 
 app.post('/annotate/register', (req, res) => {
