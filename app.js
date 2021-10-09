@@ -53,11 +53,13 @@ app.get('/annotate', auth, (req, res) => {
         connection.query(`select data from annotate where user_id = (select id from user where username = ?);`,
             [req.username],
             function (error, results) {
+             connection.release()
               if (error) throw error;
               if (results.length === 0) {
                   connection.query(`insert into annotate (user_id, data) values ((select id from user where username = ?), ?);`,
                       [req.username, JSON.stringify(defaultServerData)],
                       function (error) {
+                          connection.release()
                           if (error) throw error;
                           res.send(defaultServerData)
                       })
@@ -77,6 +79,7 @@ app.post('/annotate', auth, (req, res) => {
         connection.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
             [JSON.stringify(req.body), req.username],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 res.send(req.body)
             })
@@ -102,6 +105,7 @@ app.post('/annotate/sokoban', auth, (req, res) => {
           values ( (select id from user where username = ? limit 1), ?, ?, ?, ?, ?);`,
             [req.username, req.body.turn_count, req.body.time_seconds, req.body.soko_level, req.body.soko_sublevel, JSON.stringify(req.body.soko_path)],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 res.send(req.body)
             })
@@ -119,6 +123,7 @@ app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
         connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by time_seconds limit 20;`,
             [soko_level, soko_sublevel],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 res.send(results)
             })
@@ -136,6 +141,7 @@ app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
         connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by turn_count limit 20;`,
             [soko_level, soko_sublevel],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 res.send(results)
             })
@@ -155,6 +161,7 @@ app.post('/annotate/register', (req, res) => {
         connection.query(
             `select count(*) as username_count from user where username = ?;`, [username],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 if (results[0]['username_count'] > 0) {
                     res.status(409).send('User already exists.')
@@ -177,11 +184,13 @@ app.post('/annotate/register', (req, res) => {
                 token
             },
             function (error) {
+                connection.release()
                 if (error) throw error;
             }
         )
         res.status(201).json(token);
     } catch (err) {
+        connection.release()
         res.status(500).send('Something went wrong!')
         console.log(err)
     }
@@ -196,6 +205,7 @@ app.post('/annotate/login', (req, res) => {
         connection.query(
             `select id from user where username = ? AND password_character = ? AND password_color = ?`, [username, passwordCharacter, passwordColor],
             function (error, results) {
+                connection.release()
                 if (error) throw error;
                 if (results.length === 0) {
                     return res.status(400).send('Invalid credentials.')
@@ -211,6 +221,7 @@ app.post('/annotate/login', (req, res) => {
                 connection.query(
                     'update user set token = ? where id = ?', [token, userId],
                     function (error) {
+                        connection.release()
                         if (error) throw error;
                         return res.status(201).json(token);
                     }
