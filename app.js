@@ -89,8 +89,18 @@ app.post('/annotate', auth, (req, res) => {
 })
 
 app.delete('/annotate', auth, (req, res) => {
-    serverData = Object.assign({}, defaultServerData)
-    res.send(serverData)
+    try {
+        pool.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
+            [JSON.stringify(defaultServerData), req.username],
+            function (error, results) {
+                if (error) throw error;
+                res.send(defaultServerData)
+            })
+
+    } catch (err) {
+        res.status(500).send('Something went wrong!')
+        console.log(err)
+    }
 })
 
 app.listen(port, () => {
