@@ -3,7 +3,8 @@ const express = require('express')
 const auth = require('./middleware/auth')
 const jwt = require('jsonwebtoken')
 const mysql = require('mysql')
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
+    connectionLimit: 10,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
@@ -50,16 +51,14 @@ let serverData = Object.assign({}, defaultServerData)
 
 app.get('/annotate', auth, (req, res) => {
     try {
-        connection.query(`select data from annotate where user_id = (select id from user where username = ?);`,
+        pool.query(`select data from annotate where user_id = (select id from user where username = ?);`,
             [req.username],
             function (error, results) {
-             connection.release()
               if (error) throw error;
               if (results.length === 0) {
-                  connection.query(`insert into annotate (user_id, data) values ((select id from user where username = ?), ?);`,
+                  pool.query(`insert into annotate (user_id, data) values ((select id from user where username = ?), ?);`,
                       [req.username, JSON.stringify(defaultServerData)],
                       function (error) {
-                          connection.release()
                           if (error) throw error;
                           res.send(defaultServerData)
                       })
@@ -76,10 +75,9 @@ app.get('/annotate', auth, (req, res) => {
 
 app.post('/annotate', auth, (req, res) => {
     try {
-        connection.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
+        pool.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
             [JSON.stringify(req.body), req.username],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 res.send(req.body)
             })
@@ -101,11 +99,10 @@ app.listen(port, () => {
 
 app.post('/annotate/sokoban', auth, (req, res) => {
     try {
-        connection.query(`insert into sokoban (user_id, turn_count, time_seconds, soko_level, soko_sublevel, soko_path) 
+        pool.query(`insert into sokoban (user_id, turn_count, time_seconds, soko_level, soko_sublevel, soko_path) 
           values ( (select id from user where username = ? limit 1), ?, ?, ?, ?, ?);`,
             [req.username, req.body.turn_count, req.body.time_seconds, req.body.soko_level, req.body.soko_sublevel, JSON.stringify(req.body.soko_path)],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 res.send(req.body)
             })
@@ -120,10 +117,9 @@ app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
-        connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by time_seconds limit 20;`,
+        pool.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by time_seconds limit 20;`,
             [soko_level, soko_sublevel],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 res.send(results)
             })
@@ -138,10 +134,9 @@ app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
-        connection.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by turn_count limit 20;`,
+        pool.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by turn_count limit 20;`,
             [soko_level, soko_sublevel],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 res.send(results)
             })
@@ -158,10 +153,9 @@ app.post('/annotate/register', (req, res) => {
         if (!(username && passwordCharacter && passwordColor)) {
             res.status(400).send('username, passwordCharacter, and passwordColor are required.')
         }
-        connection.query(
+        pool.query(
             `select count(*) as username_count from user where username = ?;`, [username],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 if (results[0]['username_count'] > 0) {
                     res.status(409).send('User already exists.')
@@ -175,7 +169,7 @@ app.post('/annotate/register', (req, res) => {
                 expiresIn: "30d",
             }
         )
-        connection.query(
+        pool.query(
             'insert into user set ?',
             {
                 username,
@@ -184,13 +178,11 @@ app.post('/annotate/register', (req, res) => {
                 token
             },
             function (error) {
-                connection.release()
                 if (error) throw error;
             }
         )
         res.status(201).json(token);
     } catch (err) {
-        connection.release()
         res.status(500).send('Something went wrong!')
         console.log(err)
     }
@@ -202,10 +194,9 @@ app.post('/annotate/login', (req, res) => {
         if (!(username && passwordCharacter && passwordColor)) {
             res.status(400).send('username, passwordCharacter, and passwordColor are required.')
         }
-        connection.query(
+        pool.query(
             `select id from user where username = ? AND password_character = ? AND password_color = ?`, [username, passwordCharacter, passwordColor],
             function (error, results) {
-                connection.release()
                 if (error) throw error;
                 if (results.length === 0) {
                     return res.status(400).send('Invalid credentials.')
@@ -218,10 +209,9 @@ app.post('/annotate/login', (req, res) => {
                         expiresIn: "30d",
                     }
                 )
-                connection.query(
+                pool.query(
                     'update user set token = ? where id = ?', [token, userId],
                     function (error) {
-                        connection.release()
                         if (error) throw error;
                         return res.status(201).json(token);
                     }
