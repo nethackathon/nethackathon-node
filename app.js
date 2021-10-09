@@ -127,8 +127,21 @@ app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
-        pool.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by time_seconds limit 20;`,
-            [soko_level, soko_sublevel],
+        pool.query(`
+                    select s1.user_id, (select username from user where id = s1.user_id) as player, s1.time_seconds, s1.turn_count, s1.soko_path from sokoban s1 inner join
+                      (
+                          select user_id, min(time_seconds) as min_time_seconds
+                          from sokoban
+                          where soko_level = ? and soko_sublevel = ?
+                          group by user_id
+                      ) as s2
+                      on s1.user_id = s2.user_id
+                    where s2.min_turn_count = s1.turn_count
+                      and soko_level = ? and soko_sublevel = ?
+                    order by s2.min_time_seconds
+                        limit 20;
+            `,
+            [soko_level, soko_sublevel, soko_level, soko_sublevel],
             function (error, results) {
                 if (error) throw error;
                 res.send(results)
@@ -144,8 +157,21 @@ app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
-        pool.query(`select id, (select username from user where id = user_id) as player, turn_count, time_seconds, soko_level, soko_sublevel, soko_path from sokoban where soko_level = ? and soko_sublevel = ? order by turn_count limit 20;`,
-            [soko_level, soko_sublevel],
+        pool.query(`
+                    select s1.user_id, (select username from user where id = s1.user_id) as player, s1.time_seconds, s1.turn_count, s1.soko_path from sokoban s1 inner join
+                      (
+                          select user_id, min(turn_count) as min_turn_count
+                          from sokoban
+                          where soko_level = ? and soko_sublevel = ?
+                          group by user_id
+                      ) as s2
+                      on s1.user_id = s2.user_id
+                    where s2.min_turn_count = s1.turn_count
+                      and soko_level = ? and soko_sublevel = ?
+                    order by s2.min_turn_count
+                        limit 20;
+        `,
+            [soko_level, soko_sublevel, soko_level, soko_sublevel],
             function (error, results) {
                 if (error) throw error;
                 res.send(results)
