@@ -49,7 +49,7 @@ const defaultServerData = {
 
 let serverData = Object.assign({}, defaultServerData)
 
-app.get('/annotate', auth, (req, res) => {
+app.get('/annotate-api', auth, (req, res) => {
     try {
         pool.query(`select data from annotate where user_id = (select id from user where username = ?);`,
             [req.username],
@@ -73,7 +73,7 @@ app.get('/annotate', auth, (req, res) => {
     }
 })
 
-app.post('/annotate', auth, (req, res) => {
+app.post('/annotate-api', auth, (req, res) => {
     try {
         pool.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
             [JSON.stringify(req.body), req.username],
@@ -88,7 +88,7 @@ app.post('/annotate', auth, (req, res) => {
     }
 })
 
-app.delete('/annotate', auth, (req, res) => {
+app.delete('/annotate-api', auth, (req, res) => {
     try {
         pool.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
             [JSON.stringify(defaultServerData), req.username],
@@ -107,7 +107,7 @@ app.listen(port, () => {
     console.log(`annotate app listening at https://nethackathon.org:${port}`)
 })
 
-app.post('/annotate/sokoban', auth, (req, res) => {
+app.post('/annotate-api/sokoban', auth, (req, res) => {
     try {
         pool.query(`insert into sokoban (user_id, turn_count, time_seconds, soko_level, soko_sublevel, soko_path) 
           values ( (select id from user where username = ? limit 1), ?, ?, ?, ?, ?);`,
@@ -123,7 +123,7 @@ app.post('/annotate/sokoban', auth, (req, res) => {
     }
 })
 
-app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
+app.get('/annotate-api/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
@@ -153,7 +153,7 @@ app.get('/annotate/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
     }
 })
 
-app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
+app.get('/annotate-api/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
     let soko_level = req.params.soko_level
     let soko_sublevel = req.params.soko_sublevel
     try {
@@ -183,7 +183,7 @@ app.get('/annotate/sokoban/turns/:soko_level/:soko_sublevel', (req, res) => {
     }
 })
 
-app.post('/annotate/register', (req, res) => {
+app.post('/annotate-api/register', (req, res) => {
     try {
         const { username, passwordCharacter, passwordColor } = req.body
         if (!(username && passwordCharacter && passwordColor)) {
@@ -224,7 +224,7 @@ app.post('/annotate/register', (req, res) => {
     }
 })
 
-app.post('/annotate/login', (req, res) => {
+app.post('/annotate-api/login', (req, res) => {
     try {
         const { username, passwordCharacter, passwordColor } = req.body
         if (!(username && passwordCharacter && passwordColor)) {
