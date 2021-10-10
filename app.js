@@ -136,7 +136,7 @@ app.get('/annotate-api/sokoban/time/:soko_level/:soko_sublevel', (req, res) => {
                           group by user_id
                       ) as s2
                       on s1.user_id = s2.user_id
-                    where s2.min_turn_count = s1.turn_count
+                    where s2.min_time_seconds = s1.time_seconds
                       and soko_level = ? and soko_sublevel = ?
                     order by s2.min_time_seconds
                         limit 20;
