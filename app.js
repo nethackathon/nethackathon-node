@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const auth = require('./middleware/auth')
-const jwt = require('jsonwebtoken')
 const mysql = require('mysql')
 const pool = mysql.createPool({
     connectionLimit: 10,
@@ -10,10 +9,15 @@ const pool = mysql.createPool({
     password: process.env.DB_PASS,
     database: process.env.DB_DATABASE
 })
+const jwt = require('jsonwebtoken')
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 const app = express()
+const { errors, generators, Issuer } = require('openid-client')
+let twitchIssuer, twitchOAuthClient
 
 app.use(cors())
+app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
 
 const port = 3000
@@ -48,6 +52,94 @@ const defaultServerData = {
 }
 
 let serverData = Object.assign({}, defaultServerData)
+
+// NetHackathon Signup
+app.get("/signup/schedule", (req, res) => {
+  try {
+    const loginCookie = req.signedCookies['nethackathon_signup_login']
+    if (loginCookie === undefined) {
+      res.status(401).send('Please log in with Twitch.')
+    } else {
+      console.log('signed in')
+      console.log(req.signedCookies['nethackathon_signup_login'])
+    }
+  } catch (err) {
+    res.status(500).send('Something went wrong!')
+    console.log(err)
+  }
+})
+
+app.get("/signup/auth", (req, res) => {
+  try {
+    console.log('generating code_verifier')
+    const code_verifier = generators.codeVerifier()
+    console.log('setting code_verifier cookie')
+    res.cookie("nethackathon_code_verifier", JSON.stringify({code_verifier}), {
+      secure: false,
+      httpOnly: true,
+      signed: true
+    })
+    console.log('generating code_challenge')
+    const code_challenge = generators.codeChallenge(code_verifier)
+    console.log('getting auth url')
+    const authURL = twitchOAuthClient.authorizationUrl({
+      redirect_uri: 'http://localhost:3000/signup/auth/callback',
+      scope: 'openid',
+      code_challenge,
+      code_challenge_method: 'S256',
+    })
+    console.log('redirecting to authURL', authURL)
+    res.redirect(authURL)
+  } catch (err) {
+    res.status(500).send('Something went wrong!')
+    console.log(err)
+  }
+})
+
+app.get("/signup/auth/callback", async (req, res) => {
+  try {
+    const params = twitchOAuthClient.callbackParams(req)
+    console.log('params', params)
+    console.log('cookies', req.cookies)
+    console.log('signedCookies', req.signedCookies)
+    const code_verifier = JSON.parse(req.signedCookies.nethackathon_code_verifier).code_verifier
+    console.log('code_verifier', code_verifier)
+    try {
+      let tokenSet = await twitchOAuthClient.callback('http://localhost:3000/signup/auth/callback', params, { code_verifier })
+      console.log('tokenSet', tokenSet)
+
+      const userinfo = await twitchOAuthClient.userinfo(tokenSet.access_token);
+      console.log('userinfo %j', userinfo);
+
+      tokenSet = await twitchOAuthClient.refresh(tokenSet);
+      console.log('refreshed and validated tokens %j', tokenSet);
+      console.log('refreshed ID Token claims %j', tokenSet.claims());
+
+      res.redirect('http://localhost:8080/signup')
+    } catch (err) {
+      console.log('err', err)
+      console.log('err.response.data', err?.response?.data)
+      console.log('err.response.status', err?.response?.status)
+      console.log('err.response.headers', err?.response?.headers)
+    }
+    /*
+    const userInfo = await twitchOAuthClient.userinfo(tokenSet)
+    console.log('userInfo', userInfo)
+     */
+  } catch (err) {
+    res.status(500).send('Something went wrong!')
+    console.log(err)
+  }
+})
+
+app.get('signup/schedule', (req, res) => {
+  if (!req.signedCookies.hasOwnProperty('nethackathon_signup_login')) res.status(401).send('Please login.')
+
+  jwt.verify(req.signedCookies.nethackathon_signup_login, (err, decoded) => {
+    if (err) res.status(403).send('Invalid token.')
+    res.status(200).send('logged in as ' + decoded.preferred_username)
+  })
+})
 
 app.get('/annotate-api', auth, (req, res) => {
     try {
@@ -103,8 +195,15 @@ app.delete('/annotate-api', auth, (req, res) => {
     }
 })
 
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`annotate app listening at https://nethackathon.org:${port}`)
+    twitchIssuer = await Issuer.discover('https://id.twitch.tv/oauth2')
+    twitchOAuthClient = new twitchIssuer.Client({
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
+      redirect_uris: ['http://localhost:3000/signup/auth/callback', 'http://localhost:8080/signup'],
+      response_types: ['code']
+    })
 })
 
 app.post('/annotate-api/sokoban', auth, (req, res) => {
