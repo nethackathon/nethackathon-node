@@ -170,6 +170,19 @@ app.get('/signup/auth/callback', passport.authenticate('openidconnect', {
   failureRedirect: 'http://localhost:8080/signup'
 }));
 
+app.get('/streamers', (req, res) => {
+  pool.query("SELECT username from streamer where length(schedule) > 2", (err, records) => {
+    if (err) {
+      console.log('error in GET: /streamers, SELECT username...', err);
+      return res.status(500).send('Something went wrong.')
+    }
+    const response = {
+      streamers: records
+    }
+    res.json(response)
+  })
+})
+
 
 /* ANNOTATE ROUTES */
 const defaultServerData = {
