@@ -141,7 +141,7 @@ app.post('/signup/schedule', (req, res) => {
         console.log('error in POST: /signup/schedule, UPDATE streamer set schedule...', err);
         return res.status(500).send('Something went wrong.')
       }
-      return res.status(200)
+      return res.status(200).send()
     })
   } else {
     res.status(401).send('Please log in with Twitch.')
@@ -155,7 +155,7 @@ app.post('/signup/text', (req, res) => {
         console.log('error in POST: /signup/text UPDATE streamer set notes...', err);
         return res.status(500).send('Something went wrong.')
       }
-      return res.status(200)
+      return res.status(200).send()
     })
   } else {
     res.status(401).send('Please log in with Twitch.')
