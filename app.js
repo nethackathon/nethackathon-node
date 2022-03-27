@@ -220,12 +220,12 @@ const defaultServerData = {
 
 app.get('/annotate-api', auth, (req, res) => {
   try {
-    pool.query(`select data from annotate where user_id = (select id from user where username = ?);`,
+    pool.query(`select data from annotate where user_id = (select id from user where username = ? limit 1);`,
       [req.username],
       function (error, results) {
         if (error) throw error;
         if (results.length === 0) {
-          pool.query(`insert into annotate (user_id, data) values ((select id from user where username = ?), ?);`,
+          pool.query(`insert into annotate (user_id, data) values ((select id from user where username = ? limit 1), ?);`,
             [req.username, JSON.stringify(defaultServerData)],
             function (error) {
               if (error) throw error;
@@ -244,7 +244,7 @@ app.get('/annotate-api', auth, (req, res) => {
 
 app.post('/annotate-api', auth, (req, res) => {
   try {
-    pool.query(`update annotate set data = ? where user_id = (select id from user where username = ?);`,
+    pool.query(`update annotate set data = ? where user_id = (select id from user where username = ? limit 1);`,
       [JSON.stringify(req.body), req.username],
       function (error, results) {
         if (error) throw error;
