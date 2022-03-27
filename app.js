@@ -1,6 +1,9 @@
 require('dotenv').config();
 
 const port = 3000
+const isDev = false
+
+const appBaseUri = (isDev) ? 'http://localhost:8080' : 'https://nethackathon.org'
 
 const express = require('express');
 const logger = require('morgan');
@@ -160,14 +163,14 @@ app.post('/signup/text', (req, res) => {
 })
 
 app.get('/signup/auth', passport.authenticate('openidconnect', {
-  successReturnToOrRedirect: "http://localhost:8080/signup",
+  successReturnToOrRedirect: `${appBaseUri}/signup`,
   scope: 'openid'
 }));
 
 app.get('/signup/auth/callback', passport.authenticate('openidconnect', {
   callback: true,
-  successReturnToOrRedirect: 'http://localhost:8080/signup',
-  failureRedirect: 'http://localhost:8080/signup'
+  successReturnToOrRedirect: `${appBaseUri}/signup`,
+  failureRedirect: `${appBaseUri}/signup`
 }));
 
 app.get('/streamers', (req, res) => {
