@@ -186,6 +186,19 @@ app.get('/streamers', (req, res) => {
   })
 })
 
+app.get('/streamers/schedule', (req, res) => {
+  pool.query("SELECT username, schedule, discord_username, notes from streamer where 1;", (err, records) => {
+    if (err) {
+      console.log('error in GET: /streamers, SELECT username...', err);
+      return res.status(500).send('Something went wrong.')
+    }
+    const response = {
+      streamers: records
+    }
+    res.json(response)
+  })
+})
+
 
 /* ANNOTATE ROUTES */
 const defaultServerData = {
