@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const port = 3000
-const isDev = false
+const isDev = (process.env.MODE === 'DEV')
 
 const appBaseUri = (isDev) ? 'http://localhost:8080' : 'https://nethackathon.org'
 
@@ -10,6 +10,7 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const request = require('request');
 
 const passport = require('passport');
 const TwitchLoginStrategy = require('passport-openidconnect').Strategy
@@ -111,7 +112,52 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// NetHackathon app routes
+app.get('/adventurer', (req, res) => {
+  const characterName = req.query['character_name']
+  pool.query("SELECT claimed_by from adventurer where character_name = ? limit 1", [characterName], (err, records) => {
+    if (err) {
+      console.log('error in GET: /adventurer, SELECT claimed_by...', err);
+      return res.status(500).send('Something went wrong.')
+    }
+    const response = {
+      claimedBy: records[0]['claimed_by']
+    }
+    console.log('response', response)
+    res.json(response)
+  })
+})
 
+app.post('/adventurer', (req, res) => {
+  const characterName = req.body['characterName']
+  const claimee = req.body['claimee']
+  pool.query("UPDATE adventurer set claimed_by = ? where character_name = ? and claimed_by is NULL", [claimee, characterName], (err, dbResponse) => {
+    if (err) {
+      console.log('error in POST: /adventurer, UPDATE adventurer...', err);
+      return res.status(500).send('Something went wrong.')
+    }
+    if (dbResponse.affectedRows === 0) {
+      pool.query("SELECT claimed_by from adventurer where character_name = ? limit 1", [characterName], (err, records) => {
+        if (err) {
+          console.log('error in GET: /adventurer, SELECT claimed_by...', err);
+          return res.status(500).send('Something went wrong.')
+        }
+        const response = {
+          claimSuccessful: false,
+          claimedBy: records[0]['claimed_by']
+        }
+        return res.status(200).json(response)
+      })
+    } else {
+      const response = {
+        claimSuccessful: true,
+        claimedBy: claimee
+      }
+      console.log('response', response)
+      return res.status(200).json(response)
+    }
+  })
+})
 
 // NetHackathon Signup
 app.get('/signup/schedule', (req, res) => {
@@ -172,6 +218,30 @@ app.get('/signup/auth/callback', passport.authenticate('openidconnect', {
   successReturnToOrRedirect: `${appBaseUri}/signup`,
   failureRedirect: `${appBaseUri}/signup`
 }));
+
+app.get('/twitch/login', function(req, res) {
+  // https://id.twitch.tv/oauth2/token grant_type=authorization_code &redirect_uri=http://localhost &code=394a8bc98028f39660e53025de824134fb46313 
+  const options = {
+    uri: `${baseUri}/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=authorization_code&code=${req.params.code}&redirect_uri=${process.env.OIDC_REDIRECT_URI}`,
+    method: 'POST',
+    followAllRedirects: true
+  }
+  
+  request(options, function (error, res) {
+    console.log('res', res)
+    res.status(200).send({jwt: res.body})
+  })
+});
+
+app.get('/tagline', (req, res) => {
+  pool.query("SELECT tagline from tagline order by RAND() limit 1", (err, records) => {
+    if (err) {
+      console.log('error in GET: /tagline, SELECT tagline...', err);
+      return res.status(500).send('Something went wrong.')
+    }
+    res.json(records[0])
+  })
+})
 
 app.get('/streamers', (req, res) => {
   pool.query("SELECT username from streamer where length(schedule) > 2", (err, records) => {
