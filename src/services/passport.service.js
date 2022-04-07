@@ -22,6 +22,21 @@ async function verify(req, issuer, userId, profile, accessToken, refreshToken, p
   });
 }
 
+async function verifyByAccessToken(accessToken, cb) {
+  process.nextTick(async function () {
+    try {
+      const user = await db.query("SELECT * FROM streamer where access_token = ?;", [accessToken]);
+      if (user.length > 0) {
+        return cb(null, user[0])
+      } else {
+        return cb(null, false)
+      }
+    } catch (err) {
+      return cb(err);
+    }
+  });
+}
+
 
 async function serializeUser(user, done) {
   process.nextTick(function () {
@@ -43,6 +58,7 @@ async function deserializeUser(username, done) {
 
 module.exports = {
   verify,
+  verifyByAccessToken,
   serializeUser,
   deserializeUser
 }
