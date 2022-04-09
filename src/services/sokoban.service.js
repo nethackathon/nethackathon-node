@@ -3,7 +3,7 @@ const db = require('./db.service')
 async function updateSokoban(username, turnCount, timeSeconds, sokoLevel, sokoSubLevel, sokoPath) {
   return await db.query(`insert into sokoban (user_id, turn_count, time_seconds, soko_level, soko_sublevel, soko_path)
                          values ((select id from user where username = ? limit 1), ?, ?, ?, ?, ?);`,
-    [username, turnCount, timeSeconds, sokoLevel, sokoSublevel, sokoPath]);
+    [username, turnCount, timeSeconds, sokoLevel, sokoSubLevel, sokoPath]);
 }
 
 async function getTime(sokoLevel, sokoSublevel) {
