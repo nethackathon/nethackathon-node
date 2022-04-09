@@ -9,9 +9,9 @@ async function getAdventurer(characterName) {
 }
 
 async function claimAdventurer(claimee, characterName) {
-  const rowsUpdated = await db.query("UPDATE adventurer set claimed_by = ? where character_name = ? and claimed_by is NULL", 
+  const results = await db.query("UPDATE adventurer set claimed_by = ?, claimed_at = now() where character_name = ? and claimed_by is NULL", 
     [claimee, characterName]);
-  const claimSuccessful = (rowsUpdated > 0);
+  const claimSuccessful = (results.affectedRows > 0);
   let claimedBy = claimee;
   if (!claimSuccessful) {
     const records = await db.query("SELECT claimed_by from adventurer where character_name = ? limit 1;", 
@@ -21,6 +21,17 @@ async function claimAdventurer(claimee, characterName) {
   return {
     claimSuccessful,
     claimedBy
+  }
+}
+
+async function getLatestUpload(characterName) {
+  const records = await db.query("SELECT * from upload where character_name = ? order by uploaded_at desc limit 1;",
+    [characterName]);
+  return {
+    characterName: records[0]['character_name'],
+    uploadedBy: records[0]['uploaded_by'],
+    fileName: records[0]['file_name'],
+    uploadedAt: records[0]['uploaded_at']
   }
 }
 
@@ -42,5 +53,6 @@ async function releaseAdventurer(claimee, characterName) {
 module.exports = {
   getAdventurer,
   claimAdventurer,
-  releaseAdventurer
+  releaseAdventurer,
+  getLatestUpload
 }

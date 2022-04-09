@@ -1,4 +1,6 @@
 const invokeService = require('../services/invoke.service');
+const fs = require('fs');
+const path = require('path');
 
 async function get(req, res, next) {
   try {
@@ -26,8 +28,15 @@ async function getAdventurer(req, res, next) {
 async function claimAdventurer(req, res, next) {
   try {
     const claimee = req.user.username;
-    const characterName = req.body['characterName']
-    res.json(await invokeService.claimAdventurer(claimee, characterName));
+    const characterName = req.body['characterName'];
+    const response = await invokeService.claimAdventurer(claimee, characterName);
+    console.log('claimAdventurer response', response);
+    if (!response.claimSuccessful) {
+      return res.status(200).send(response);
+    }
+    const latestUpload = await invokeService.getLatestUpload(characterName);
+    console.log('latestUpload', latestUpload);
+    return res.status(200).send({ ...latestUpload, ...response });
   } catch (err) {
     console.error('Error in invoke.controller claimAdventurer.', err.message);
     next(err);
@@ -56,10 +65,38 @@ async function uploadSave(req, res, next) {
   }
 }
 
+async function downloadSave(req, res, next) {
+  try {
+    let headers = {
+      'Connection': 'close',
+      'Content-Encoding': 'gzip'
+    }
+    const filePath = path.join(__dirname, '..', '..', 'saves', req.body['fileName']);
+    let file = fs.readFileSync(filePath); 
+    headers['Content-Length'] = file.length;
+    res.writeHead(200, headers);
+    let chunkLimit = 16 * 1024;
+    let chunkCount = Math.ceil(file.length / chunkLimit);
+    for (let i = 0; i < chunkCount; i++) {
+      if (chunkCount > 1) {
+        let chunk = file.slice(i * chunkLimit, (i + 1) * chunkLimit);
+        res.write(chunk);
+      } else {
+        res.write(file);
+      }
+    }
+    res.end();
+  } catch (err) {
+    console.error('Error in invoke.controller uploadSave.', err.message);
+    next(err);
+  }
+}
+
 module.exports = {
   releaseAdventurer,
   get,
   getAdventurer,
   claimAdventurer,
-  uploadSave
+  uploadSave,
+  downloadSave
 }

@@ -26,4 +26,6 @@ router.post('/releaseAdventurer', twitchAuth, invokeController.releaseAdventurer
 
 router.post('/uploadSave', [passport.authenticate('bearer-token', { session: false }), upload.single('file')], invokeController.uploadSave);
 
+router.post('/downloadSave', passport.authenticate('bearer-token', { session: false }), invokeController.downloadSave);
+
 module.exports = router;
