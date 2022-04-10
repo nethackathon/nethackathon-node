@@ -57,7 +57,7 @@ async function releaseAdventurer(req, res, next) {
 async function uploadSave(req, res, next) {
   try {
     console.log('uploadSave req', req);
-    // TODO: record file name in database
+    await invokeService.recordUpload(req.body.characterName, req.user.username, req.file.filename);
     res.status(200).send()
   } catch (err) {
     console.error('Error in invoke.controller uploadSave.', err.message);

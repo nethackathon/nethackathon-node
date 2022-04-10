@@ -4,6 +4,7 @@ const passport = require('passport');
 
 const isDev = (process.env.MODE === 'DEV')
 const appBaseUri = (isDev) ? 'http://localhost:8080' : 'https://nethackathon.org'
+const electronReturnUri = (isDev) ? 'http://localhost:8080' : 'http://localhost'
 
 /* signup web app routes */
 router.get('/auth', passport.authenticate('web-app-twitch', {
@@ -19,14 +20,14 @@ router.get('/auth/callback', passport.authenticate('web-app-twitch', {
 
 /* electron app routes */
 router.get('/electron', passport.authenticate('electron-twitch', {
-  successReturnToOrRedirect: `http://localhost:8080/`,
+  successReturnToOrRedirect: electronReturnUri,
   scope: 'openid'
 }));
 
 router.get('/electron/callback', passport.authenticate('electron-twitch', {
   callback: true,
-  successReturnToOrRedirect: `http://localhost:8080/`,
-  failureRedirect: `http://localhost:8080/`
+  successReturnToOrRedirect: electronReturnUri,
+  failureRedirect: electronReturnUri
 }));
 
 module.exports = router;

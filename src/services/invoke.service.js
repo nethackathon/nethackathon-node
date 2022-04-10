@@ -24,6 +24,12 @@ async function claimAdventurer(claimee, characterName) {
   }
 }
 
+async function recordUpload(characterName, uploadedBy, fileName) {
+  console.log('recordUpload', characterName, uploadedBy, fileName);
+  return db.query("INSERT into upload (character_name, uploaded_by, file_name, uploaded_at) values (?, ?, ?, now());",
+    [characterName, uploadedBy, fileName]);
+}
+
 async function getLatestUpload(characterName) {
   const records = await db.query("SELECT * from upload where character_name = ? order by uploaded_at desc limit 1;",
     [characterName]);
@@ -54,5 +60,6 @@ module.exports = {
   getAdventurer,
   claimAdventurer,
   releaseAdventurer,
-  getLatestUpload
+  getLatestUpload,
+  recordUpload
 }
