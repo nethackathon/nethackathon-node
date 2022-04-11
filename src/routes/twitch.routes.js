@@ -8,14 +8,14 @@ const electronReturnUri = (isDev) ? 'http://localhost:8080' : 'http://localhost'
 
 /* signup web app routes */
 router.get('/auth', passport.authenticate('web-app-twitch', {
-  successReturnToOrRedirect: `${appBaseUri}/signup`,
+  successReturnToOrRedirect: `${appBaseUri}/streamers`,
   scope: 'openid'
 }));
 
 router.get('/auth/callback', passport.authenticate('web-app-twitch', {
   callback: true,
-  successReturnToOrRedirect: `${appBaseUri}/signup`,
-  failureRedirect: `${appBaseUri}/signup`
+  successReturnToOrRedirect: `${appBaseUri}/streamers`,
+  failureRedirect: `${appBaseUri}/streamers`
 }));
 
 /* electron app routes */

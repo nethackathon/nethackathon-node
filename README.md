@@ -1,3 +1,7 @@
+# Remember
+  - We repurposed the signup callbacks for streamer login, probably worth
+combining those two pages regardless.
+
 # Database schema
 
 ## user

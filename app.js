@@ -43,6 +43,7 @@ const annotateRouter = require('./src/routes/annotate.routes');
 const loginRouter = require('./src/routes/login.routes');
 const invokeRouter = require('./src/routes/invoke.routes');
 const signupRouter = require('./src/routes/signup.routes');
+const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
 const twitchRouter = require('./src/routes/twitch.routes');
 
@@ -51,6 +52,7 @@ app.use('/annotate', annotateRouter);
 app.use('/auth', loginRouter);
 app.use('/invoke', invokeRouter);
 app.use('/signup', signupRouter);
+app.use('/streamer', streamerRouter);
 app.use('/sokoban', sokobanRouter);
 app.use('/twitch', twitchRouter);
 
