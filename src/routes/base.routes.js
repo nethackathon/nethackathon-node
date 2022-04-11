@@ -8,4 +8,8 @@ router.get('/streamers', baseController.getStreamers);
 
 router.get('/streamers/schedule', baseController.getStreamersSchedule);
 
+router.get('/livelog', baseController.getLiveLog);
+
+router.get('/schedule', baseController.getSchedule);
+
 module.exports = router;
