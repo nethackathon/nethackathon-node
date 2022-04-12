@@ -10,6 +10,8 @@ router.get('/streamers/schedule', baseController.getStreamersSchedule);
 
 router.get('/livelog', baseController.getLiveLog);
 
+router.get('/endedGames', baseController.getEndedGames);
+
 router.get('/schedule', baseController.getSchedule);
 
 module.exports = router;

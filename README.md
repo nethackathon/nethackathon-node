@@ -1,3 +1,7 @@
+# Livelog
+  - Client should be able to request all lines after a certain timestamp
+  - Keep last 1000 lines in memory
+
 # Remember
   - We repurposed the signup callbacks for streamer login, probably worth
 combining those two pages regardless.
