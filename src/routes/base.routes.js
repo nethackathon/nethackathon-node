@@ -10,6 +10,8 @@ const baseController = require('../controllers/base.controller');
 
 router.get('/livelog', baseController.getLiveLog);
 
+router.get('/endedGames', baseController.getEndedGames);
+
 // router.get('/schedule', baseController.getSchedule);
 
 module.exports = router;
