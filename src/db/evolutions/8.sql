@@ -54,3 +54,4 @@ insert into achievement (name, type) values ("Gray dyed egg","egg");
 insert into achievement (name, type) values ("Yellow dyed egg","egg");
 insert into achievement (name, type) values ("Chocolate egg","egg");
 insert into achievement (name, type) values ("Golden egg","egg");
+insert into achievement (name, type) values ("Faberge egg","egg");
