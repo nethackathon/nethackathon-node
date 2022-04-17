@@ -22,7 +22,7 @@ const schedule = {
     {"username": "toddrafter", "start_time": "1650186000000", "duration": 3 }, 
     {"username": "finitelycraig", "start_time": "1650196800000", "duration": 3 }, 
     { "username": "l__e__w", "start_time": "1650207600000", "duration": 2 }, 
-    { "username": "nethackathon", "start_time": "1650214800000", "duration": 2, "title": "Race to Sokoban prize and Mine's End luckstone, Finals!" }, 
+    { "username": "d_i_s_p_e_r_s_e", "start_time": "1650214800000", "duration": 2, "title": "Speed run finals between world record holding luxidream and aoeixsz4, first to ascend wins!" }, 
     { "username": "d_i_s_p_e_r_s_e", "start_time": "1650222000000", "duration": 2 }]
 }
 
