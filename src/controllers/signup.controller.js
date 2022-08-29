@@ -20,7 +20,7 @@ async function updateSchedule(req, res, next) {
 
 async function updateText(req, res, next) {
   try {
-    res.json(await signupService.updateText(req.user.username, req.body.notes, req.body.discordUsername));
+    res.json(await signupService.updateText(req.user.username, req.body.notes, req.body.discordUsername, req.body.pronouns));
   } catch (err) {
     console.error('Error in sokoban.controller getTurns.', err.message);
     next(err);
