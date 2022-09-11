@@ -1,7 +1,7 @@
 const baseService = require('../services/base.service');
 const { exec } = require('child_process');
 const path = require('path');
-const schedule = require('../data/schedule-spring-2022');
+const schedule = require('../data/current-schedule');
 const livelogLines = (process.env.LIVELOG_LINES) ? (process.env.LIVELOG_LINES) : 100
 
 async function getTagline(req, res, next) {
@@ -44,7 +44,7 @@ async function getLiveLog(req, res, next) {
   try {
     let curTime = req.query['curtime'];
     if (curTime !== undefined) curTime = parseInt(curTime);
-    
+
     const livelogPath = path.join(__dirname, '..', '..', 'livelog');
     exec(`tail -n ${livelogLines} ${livelogPath}`, (error, stdout, stderr) => {
       const output = [];
@@ -53,7 +53,7 @@ async function getLiveLog(req, res, next) {
         const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
         if (l && l.length > 7) {
           const logTime = parseInt(l[8]);
-          // if curtime query string 
+          // if curtime query string
           if (curTime === undefined || logTime > curTime) {
             output.push({message: `${l[2]} (${l[3]} ${l[4]} ${l[5]} ${l[6]}) ${l[9]}, on T:${l[7]}`, time: logTime, type: l[1]});
           }
