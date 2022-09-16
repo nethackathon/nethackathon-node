@@ -79,7 +79,7 @@ async function getEndedGames(req, res, next) {
       const lines = stdout.split('\n');
       lines.forEach((line) => {
         if (line.length > 0) {
-          const vars = line.split(/\s+/)
+          const vars = line.split(/\s{2,}/)
           const varObj = {}
           vars.forEach((v) => {
             let varr = v.split(/=/)
