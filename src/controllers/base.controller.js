@@ -73,15 +73,20 @@ async function getLiveLog(req, res, next) {
 
 async function getEndedGames(req, res, next) {
   try {
-    const livelogPath = path.join(__dirname, '..', '..', 'livelog');
-    exec(`grep 'lltype=16384' ${livelogPath}`, (error, stdout, stderr) => {
+    const livelogPath = path.join(__dirname, '..', '..', 'xlogfile');
+    exec(`tail ${livelogPath}`, (error, stdout, stderr) => {
       const output = [];
       const lines = stdout.split('\n');
       lines.forEach((line) => {
-        const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
-        if (l && l.length > 7) {
-          const logTime = parseInt(l[8]);
-          output.push({message: `${l[2]} (${l[3]} ${l[4]} ${l[5]} ${l[6]}) ${l[9]}, on T:${l[7]}`, time: logTime, type: l[1]});
+        if (line.length > 0) {
+          const vars = line.split(/\s+/)
+          const varObj = {}
+          vars.forEach((v) => {
+            let varr = v.split(/=/)
+            varObj[varr[0]] = varr[1]
+          })
+          const logTime = parseInt(varObj['endtime']);
+          output.push({message: `${varObj['name']} (${varObj['role']} ${varObj['race']} ${varObj['gender']} ${varObj['align']}) ${varObj['death']}, on T:${varObj['turns']}`, time: logTime, type: 16384});
         }
       });
       return res.json(output);

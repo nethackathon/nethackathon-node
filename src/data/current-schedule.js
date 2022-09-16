@@ -10,13 +10,13 @@ const schedule =
         { "username": "doktor__l", "start_time": "1663401600000" },
         {"username": "toddrafter", "start_time": "1663408800000"},
         {
-          "username": "finitelycraig",
+          "username": "PeteGoz",
           "start_time": "1663416000000",
           "notes": "With special guest, Cloudmillion."
         },
         {"username": "AntiGulp", "start_time": "1663423200000"},
         {
-          "username": "PeteGoz",
+          "username": "finitelycraig",
           "start_time": "1663430400000",
           "notes": "With special guest, d_i_s_p_e_r_s_e."
         },
