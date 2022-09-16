@@ -47,14 +47,17 @@ const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
 const twitchRouter = require('./src/routes/twitch.routes');
 
+const livelogOnly = !!process.env.LIVELOG_ONLY
 app.use('/', baseRouter);
-app.use('/annotate', annotateRouter);
-app.use('/auth', loginRouter);
-app.use('/invoke', invokeRouter);
-app.use('/signup', signupRouter);
-app.use('/streamer', streamerRouter);
-app.use('/sokoban', sokobanRouter);
-app.use('/twitch', twitchRouter);
+if (!livelogOnly) {
+  app.use('/annotate', annotateRouter);
+  app.use('/auth', loginRouter);
+  app.use('/invoke', invokeRouter);
+  app.use('/signup', signupRouter);
+  app.use('/streamer', streamerRouter);
+  app.use('/sokoban', sokobanRouter);
+  app.use('/twitch', twitchRouter);
+}
 
 app.listen(port, async () => {
   console.log(`annotate app listening at https://nethackathon.org:${port}`);
