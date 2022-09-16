@@ -31,13 +31,13 @@ if (!livelogOnly) {
   passport.deserializeUser(passportService.deserializeUser);
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(session(sessionConfig));
 }
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(cors(corsConfig));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session(sessionConfig));
 
 /* ROUTES */
 const baseRouter = require('./src/routes/base.routes');
