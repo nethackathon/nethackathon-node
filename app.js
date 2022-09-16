@@ -1,4 +1,5 @@
 require('dotenv').config();
+const livelogOnly = !!process.env.LIVELOG_ONLY
 
 /* NPM MODULES */
 const express = require('express');
@@ -22,20 +23,21 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 /* MIDDLEWARE */
-passport.use('bearer-token', new BearerTokenStrategy(passportService.verifyByAccessToken));
-passport.use('web-app-twitch', new TwitchLoginStrategy(webAppConfig, passportService.verify));
-passport.use('electron-twitch', new TwitchLoginStrategy(electronConfig, passportService.verify));
-passport.serializeUser(passportService.serializeUser);
-passport.deserializeUser(passportService.deserializeUser);
+if (!livelogOnly) {
+  passport.use('bearer-token', new BearerTokenStrategy(passportService.verifyByAccessToken));
+  passport.use('web-app-twitch', new TwitchLoginStrategy(webAppConfig, passportService.verify));
+  passport.use('electron-twitch', new TwitchLoginStrategy(electronConfig, passportService.verify));
+  passport.serializeUser(passportService.serializeUser);
+  passport.deserializeUser(passportService.deserializeUser);
+  app.use(passport.initialize());
+  app.use(passport.session());
+}
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(cors(corsConfig));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session(sessionConfig));
-app.use(passport.initialize());
-app.use(passport.session());
-
 
 /* ROUTES */
 const baseRouter = require('./src/routes/base.routes');
@@ -47,7 +49,6 @@ const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
 const twitchRouter = require('./src/routes/twitch.routes');
 
-const livelogOnly = !!process.env.LIVELOG_ONLY
 app.use('/', baseRouter);
 if (!livelogOnly) {
   app.use('/annotate', annotateRouter);
