@@ -13,11 +13,11 @@ function createToken(username) {
 
 async function login(username, passwordCharacter, passwordColor) {
   const rows = await db.query(
-    `select id from user where username = ? AND password_character = ? AND password_color = ?`, 
+    `select id from user where username = ? AND password_character = ? AND password_color = ?`,
     [username, passwordCharacter, passwordColor]);
   let invalidCredentials = (rows.length === 0);
   let token = '';
-  
+
   if (!invalidCredentials) {
     let userId = rows[0]['id'];
     token = createToken(username);
@@ -27,10 +27,11 @@ async function login(username, passwordCharacter, passwordColor) {
 }
 
 async function register(username, passwordCharacter, passwordColor) {
-  const count = await db.query(`select count(*) as username_count from user where username = ?;`, [username]);
+  const rows = await db.query(`select count(*) as username_count from user where username = ?;`, [username]);
+  let count = rows[0].username_count;
   let userExists = (count > 0);
   let token = '';
-  
+
   if (!userExists) {
     token = createToken(username);
     await db.query(

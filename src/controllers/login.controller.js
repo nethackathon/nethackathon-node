@@ -8,7 +8,7 @@ async function login(req, res, next) {
     }
     const { invalidCredentials, token } = await loginService.login(username, passwordCharacter, passwordColor);
     if (invalidCredentials) res.status(400).send('Invalid credentials.');
-    res.status(200).json(token);
+    res.status(201).json(token);
   } catch (err) {
     console.error('Error in login.controller login.', err.message);
     next(err);
@@ -21,9 +21,12 @@ async function register(req, res, next) {
     if (!(username && passwordCharacter && passwordColor)) {
       res.status(400).send('username, passwordCharacter, and passwordColor are required.');
     }
-    const { userExists, token } = res.json(await loginService.register(username, passwordCharacter, passwordColor));
-    if (userExists) res.status(409).send('User already exists.');
-    res.status(201).json(token);
+    const { userExists, token } = await loginService.register(username, passwordCharacter, passwordColor);
+    if (userExists) {
+      res.status(409).send('User already exists.');
+    } else {
+      res.status(201).json(token);
+    }
   } catch (err) {
     console.error('Error in login.controller register.', err.message);
     next(err);
