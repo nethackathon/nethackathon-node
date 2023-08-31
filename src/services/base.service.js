@@ -11,7 +11,7 @@ async function getStreamers() {
 }
 
 async function getStreamersSchedule() {
-  const records = await db.query("SELECT username, schedule from streamer where 1;");
+  const records = await db.query("SELECT username, schedule, slot_length from streamer where 1;");
   return { streamers : records };
 }
 
