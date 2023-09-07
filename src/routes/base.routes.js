@@ -5,7 +5,7 @@ const livelogOnly = !!process.env.LIVELOG_ONLY
 
 router.get('/livelog', baseController.getHardfoughtLiveLog);
 
-router.get('/endedGames', baseController.getEndedGames);
+router.get('/endedGames', baseController.getHardfoughtEndedGames);
 
 if (!livelogOnly) {
   router.get('/tagline', baseController.getTagline);

@@ -94,6 +94,32 @@ async function getLiveLog(req, res, next) {
     next(err);
   }
 }
+async function getHardfoughtEndedGames(req, res, next) {
+  try {
+    const livelogURLs = [
+      'https://www.hardfought.org/xlogfiles/nethackathon/xlogfile',
+    ];
+    const xlogfile = await axios.get(livelogURLs[0]);
+    const output = [];
+    const lines = xlogfile.split('\n');
+    lines.forEach((line) => {
+      if (line.length > 0) {
+        const vars = line.split(/\s{4}|\t/)
+        const varObj = {}
+        vars.forEach((v) => {
+          let varr = v.split(/=/)
+          varObj[varr[0]] = varr[1]
+        })
+        const logTime = parseInt(varObj['endtime']);
+        output.push({message: `${varObj['name']} (${varObj['role']} ${varObj['race']} ${varObj['gender']} ${varObj['align']}) ${varObj['death']}, on T:${varObj['turns']}`, time: logTime, type: 16384});
+      }
+    });
+    return res.json(output);
+  } catch (err) {
+    console.error('Error in base.controller getHardfoughtEndedGames.', err.message);
+    next(err);
+  }
+}
 
 async function getEndedGames(req, res, next) {
   try {
@@ -127,6 +153,7 @@ module.exports = {
   getStreamersSchedule,
   getHardfoughtLiveLog,
   getLiveLog,
+  getHardfoughtEndedGames,
   getEndedGames,
   getSchedule
 }
