@@ -45,6 +45,8 @@ async function getHardfoughtLiveLog(req, res, next) {
   try {
     const livelogURLs = [
       'https://www.hardfought.org/xlogfiles/nethackathon/livelog',
+      'https://eu.hardfought.org/xlogfiles/nethackathon/livelog',
+      'https://au.hardfought.org/xlogfiles/nethackathon/livelog',
     ];
     const livelog = await axios.get(livelogURLs[0]);
     const livelogText = livelog.data;
@@ -98,6 +100,8 @@ async function getHardfoughtEndedGames(req, res, next) {
   try {
     const livelogURLs = [
       'https://www.hardfought.org/xlogfiles/nethackathon/xlogfile',
+      'https://eu.hardfought.org/xlogfiles/nethackathon/xlogfile',
+      'https://au.hardfought.org/xlogfiles/nethackathon/xlogfile',
     ];
     const xlogfile = await axios.get(livelogURLs[0]);
     const xlogfileText = xlogfile.data;
