@@ -41,6 +41,11 @@ async function getSchedule(req, res, next) {
   }
 }
 
+async function fetchText(url) {
+  const response = await axios.get(url);
+  return response.data
+}
+
 async function getHardfoughtLiveLog(req, res, next) {
   try {
     const livelogURLs = [
@@ -48,10 +53,9 @@ async function getHardfoughtLiveLog(req, res, next) {
       'https://eu.hardfought.org/xlogfiles/nethackathon/livelog',
       'https://au.hardfought.org/xlogfiles/nethackathon/livelog',
     ];
-    const livelog = await axios.get(livelogURLs[0]);
-    const livelogText = livelog.data;
+    const combinedText = await Promise.all(livelogURLs.map(fetchText));
     const output = [];
-    const lines = livelogText.split('\n');
+    const lines = combinedText.join('').split('\n');
     lines.forEach((line) => {
       const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
       if (l && l.length > 7) {
@@ -103,10 +107,9 @@ async function getHardfoughtEndedGames(req, res, next) {
       'https://eu.hardfought.org/xlogfiles/nethackathon/xlogfile',
       'https://au.hardfought.org/xlogfiles/nethackathon/xlogfile',
     ];
-    const xlogfile = await axios.get(livelogURLs[0]);
-    const xlogfileText = xlogfile.data;
+    const combinedText = await Promise.all(livelogURLs.map(fetchText));
     const output = [];
-    const lines = xlogfileText.split('\n');
+    const lines = combinedText.join('').split('\n');
     lines.forEach((line) => {
       if (line.length > 0) {
         const vars = line.split(/\s{4}|\t/)
