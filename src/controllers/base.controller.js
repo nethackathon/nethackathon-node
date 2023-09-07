@@ -100,8 +100,9 @@ async function getHardfoughtEndedGames(req, res, next) {
       'https://www.hardfought.org/xlogfiles/nethackathon/xlogfile',
     ];
     const xlogfile = await axios.get(livelogURLs[0]);
+    const xlogfileText = xlogfile.data;
     const output = [];
-    const lines = xlogfile.split('\n');
+    const lines = xlogfileText.split('\n');
     lines.forEach((line) => {
       if (line.length > 0) {
         const vars = line.split(/\s{4}|\t/)
