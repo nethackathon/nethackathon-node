@@ -3,7 +3,7 @@ const router = express.Router();
 const baseController = require('../controllers/base.controller');
 const livelogOnly = !!process.env.LIVELOG_ONLY
 
-router.get('/livelog', baseController.getLiveLog);
+router.get('/livelog', baseController.getHardfoughtLiveLog);
 
 router.get('/endedGames', baseController.getEndedGames);
 

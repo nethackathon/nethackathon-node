@@ -40,6 +40,29 @@ async function getSchedule(req, res, next) {
   }
 }
 
+async function getHardfoughtLiveLog(req, res, next) {
+  try {
+    const livelogURLs = [
+      'https://www.hardfought.org/xlogfiles/nethackathon/livelog',
+    ];
+    const livelog = await fetch(livelogURLs[0]);
+    const livelogText = await livelog.text();
+    const output = [];
+    const lines = livelogText.split('\n');
+    lines.forEach((line) => {
+      const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
+      if (l && l.length > 7) {
+        const logTime = parseInt(l[8]);
+        output.push({message: `${l[2]} (${l[3]} ${l[4]} ${l[5]} ${l[6]}) ${l[9]}, on T:${l[7]}`, time: logTime, type: l[1]});
+      }
+    });
+    return res.json(output);
+  } catch (err) {
+    console.error('Error in base.controller getHardfoughtLiveLog.', err.message);
+    next(err);
+  }
+}
+
 async function getLiveLog(req, res, next) {
   try {
     let curTime = req.query['curtime'];
@@ -101,6 +124,7 @@ module.exports = {
   getTagline,
   getStreamers,
   getStreamersSchedule,
+  getHardfoughtLiveLog,
   getLiveLog,
   getEndedGames,
   getSchedule
