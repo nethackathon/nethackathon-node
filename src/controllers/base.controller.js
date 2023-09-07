@@ -2,6 +2,7 @@ const baseService = require('../services/base.service');
 const { exec } = require('child_process');
 const path = require('path');
 const schedule = require('../data/current-schedule');
+const axios = require('axios');
 const livelogLines = (process.env.LIVELOG_LINES) ? (process.env.LIVELOG_LINES) : 100
 
 async function getTagline(req, res, next) {
@@ -45,8 +46,8 @@ async function getHardfoughtLiveLog(req, res, next) {
     const livelogURLs = [
       'https://www.hardfought.org/xlogfiles/nethackathon/livelog',
     ];
-    const livelog = await fetch(livelogURLs[0]);
-    const livelogText = await livelog.text();
+    const livelog = await axios.get(livelogURLs[0]);
+    const livelogText = livelog.data;
     const output = [];
     const lines = livelogText.split('\n');
     lines.forEach((line) => {
