@@ -47,6 +47,7 @@ const signupRouter = require('./src/routes/signup.routes');
 const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
 const twitchRouter = require('./src/routes/twitch.routes');
+const eventRouter = require('./src/routes/event.routes');
 
 app.use('/', baseRouter);
 if (!livelogOnly) {
@@ -57,6 +58,7 @@ if (!livelogOnly) {
   app.use('/streamer', streamerRouter);
   app.use('/sokoban', sokobanRouter);
   app.use('/twitch', twitchRouter);
+  app.use('/event', eventRouter);
 }
 
 app.listen(port, async () => {

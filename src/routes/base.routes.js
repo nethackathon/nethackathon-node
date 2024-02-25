@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const baseController = require('../controllers/base.controller');
+const eventController = require('../controllers/event.controller');
 const livelogOnly = !!process.env.LIVELOG_ONLY
 
 router.get('/livelog', baseController.getHardfoughtLiveLog);
@@ -16,5 +17,7 @@ if (!livelogOnly) {
 
   router.get('/schedule', baseController.getSchedule);
 }
+
+router.get('/events', eventController.getEvents);
 
 module.exports = router;
