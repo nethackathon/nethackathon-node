@@ -60,4 +60,4 @@ insert into event_streamer (event_id, streamer_id, start_time, end_time)
 values (1, (select id from streamer where username = 'shadowrider38'), '2021-09-13 01:00:00', '2021-09-13 04:00:00');
 
 insert into event_media (event_id, media_type, video_type, platform, media_url, title, description, start_time, end_time)
-values (1, 'playlist', 'full_segment', 'youtube', 'https://youtube.com/playlist?list=PLChC_Y8sQL214ruTt5t6eKeu0Z2Y_BZgu', 'NetHackathon Fall 2021', 'On September 10 - 12, 2021, twenty-two Twitch content creators streamed NetHack continuously for over 56 hours!', '2021-09-10 17:00:00', '2021-09-13 04:00:00');
+values (1, 'playlist', 'full_segment', 'youtube', 'https://www.youtube.com/embed/videoseries?list=PLChC_Y8sQL214ruTt5t6eKeu0Z2Y_BZgu', 'Streamer Segments Compilation: YouTube Playlist', 'On September 10 - 12, 2021, twenty-two Twitch content creators streamed NetHack continuously for over 56 hours!', '2021-09-10 17:00:00', '2021-09-13 04:00:00');

@@ -1,5 +1,26 @@
 const eventService = require('../services/event.service');
 
+async function getCurrentEvent(req, res, next) {
+  try {
+    const returnData = await eventService.getCurrentEvent();
+    res.json({currentEvent: returnData});
+  } catch (err) {
+    console.error('Error in event.controller getCurrentEvent.', err.message);
+    next(err);
+  }
+}
+
+async function getEventById(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const returnData = await eventService.getEventById(eventId);
+    res.json({event: returnData});
+  } catch (err) {
+    console.error('Error in event.controller getEventById.', err.message);
+    next(err);
+  }
+}
+
 async function getEvents(req, res, next) {
   try {
     const returnData = await eventService.getEvents();
@@ -33,6 +54,8 @@ async function getMediaByEventId(req, res, next) {
 }
 
 module.exports = {
+  getCurrentEvent,
+  getEventById,
   getEvents,
   getMediaByEventId,
   getStreamersByEventId,

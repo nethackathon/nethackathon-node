@@ -1,8 +1,18 @@
 const db = require('./db.service')
 
+async function getEventById(eventId) {
+  const records = await db.query('select * from event where id = ?;', [eventId]);
+  return([records]);
+}
+
 async function getEvents() {
   const records = await db.query('select * from event order by event_start;');
   return(records);
+}
+
+async function getCurrentEvent() {
+  const records = await db.query('select * from event order by event_start desc limit 1;');
+  return(records[0]);
 }
 
 async function getStreamersByEventId(eventId) {
@@ -25,6 +35,8 @@ async function getMediaByEventId(eventId) {
 }
 
 module.exports = {
+  getCurrentEvent,
+  getEventById,
   getEvents,
   getMediaByEventId,
   getStreamersByEventId,
