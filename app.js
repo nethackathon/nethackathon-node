@@ -1,6 +1,5 @@
 const path = require('path');
 require('dotenv').config({path: '.env'});
-const livelogOnly = process.env.LIVELOG_ONLY === 'true';
 
 /* NPM MODULES */
 const express = require('express');
@@ -42,7 +41,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const baseRouter = require('./src/routes/base.routes');
 const annotateRouter = require('./src/routes/annotate.routes');
 const loginRouter = require('./src/routes/login.routes');
-const invokeRouter = require('./src/routes/invoke.routes');
 const signupRouter = require('./src/routes/signup.routes');
 const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
@@ -50,16 +48,13 @@ const twitchRouter = require('./src/routes/twitch.routes');
 const eventRouter = require('./src/routes/event.routes');
 
 app.use('/', baseRouter);
-if (!livelogOnly) {
-  app.use('/annotate', annotateRouter);
-  app.use('/auth', loginRouter);
-  app.use('/invoke', invokeRouter);
-  app.use('/signup', signupRouter);
-  app.use('/streamer', streamerRouter);
-  app.use('/sokoban', sokobanRouter);
-  app.use('/twitch', twitchRouter);
-  app.use('/event', eventRouter);
-}
+app.use('/annotate', annotateRouter);
+app.use('/auth', loginRouter);
+app.use('/signup', signupRouter);
+app.use('/streamer', streamerRouter);
+app.use('/sokoban', sokobanRouter);
+app.use('/twitch', twitchRouter);
+app.use('/event', eventRouter);
 
 app.listen(port, async () => {
   console.log(`annotate app listening at https://nethackathon.org:${port}`);
