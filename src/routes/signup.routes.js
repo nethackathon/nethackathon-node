@@ -5,8 +5,8 @@ const twitchAuth = require('../middleware/twitchAuth');
 
 router.get('/', twitchAuth, signupController.get);
 
-router.post('/schedule', twitchAuth, signupController.updateSchedule);
+router.put('/schedule', twitchAuth, signupController.updateSchedule);
 
-router.post('/text', twitchAuth, signupController.updateText);
+router.put('/text', twitchAuth, signupController.updateText);
 
 module.exports = router;

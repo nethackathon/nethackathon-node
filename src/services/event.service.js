@@ -11,7 +11,12 @@ async function getEvents() {
 }
 
 async function getCurrentEvent() {
-  const records = await db.query('select * from event order by event_start desc limit 1;');
+  // TODO: Add event_charity table and join here
+  const records = await db.query(
+    `select *, null as charity from event
+      order by event_start
+      desc limit 1;`
+  );
   return(records[0]);
 }
 
