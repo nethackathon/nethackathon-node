@@ -7,7 +7,7 @@ async function get(username) {
   );
   return {
     pronouns: record?.pronouns ?? '',
-    schedule: record?.schedule ?? {},
+    schedule: record?.schedule ?? '{}',
     discordUsername: record?.discord_username ?? '',
     notes: record?.notes ?? '',
     slotLength: record?.slot_length ?? '',
