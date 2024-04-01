@@ -1,17 +1,17 @@
 create table event (
     id serial,
     title varchar(255),
-    signup_start timestamp,
-    signup_end timestamp,
-    event_start timestamp,
-    event_end timestamp
+    signup_start datetime,
+    signup_end datetime,
+    event_start datetime,
+    event_end datetime
 );
 
 create table event_streamer (
     event_id bigint unsigned,
     streamer_id bigint unsigned,
-    start_time timestamp,
-    end_time timestamp
+    start_time datetime,
+    end_time datetime
 );
 alter table event_streamer
 add constraint fk__event_streamer__event
@@ -32,8 +32,8 @@ create table event_media (
     thumbnail_url varchar(255),
     title varchar(255),
     description varchar(1024),
-    start_time timestamp,
-    end_time timestamp
+    start_time datetime,
+    end_time datetime
 );
 alter table event_media
 add constraint fk__event_media__event

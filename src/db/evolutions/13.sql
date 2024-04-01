@@ -1,5 +1,5 @@
 -- Spring 2022 Event
-
+SET time_zone = "+00:00";
 insert into event (
     id,
     title,

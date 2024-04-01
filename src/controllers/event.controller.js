@@ -10,6 +10,16 @@ async function getCurrentEvent(req, res, next) {
   }
 }
 
+async function getCurrentEventSchedule(req, res, next) {
+  try {
+    const returnData = await eventService.getCurrentEventSchedule();
+    res.json(returnData);
+  } catch (err) {
+    console.error('Error in event.controller getCurrentEventSchedule.', err.message);
+    next(err);
+  }
+}
+
 async function getEventById(req, res, next) {
   try {
     const eventId = req.params.eventId;
@@ -55,6 +65,7 @@ async function getMediaByEventId(req, res, next) {
 
 module.exports = {
   getCurrentEvent,
+  getCurrentEventSchedule,
   getEventById,
   getEvents,
   getMediaByEventId,

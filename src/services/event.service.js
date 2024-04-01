@@ -20,6 +20,17 @@ async function getCurrentEvent() {
   return(records[0]);
 }
 
+async function getCurrentEventSchedule() {
+  const records = await db.query(
+    `select streamer.username, event_streamer.start_time, event_streamer.end_time, event_streamer.notes
+          from event_streamer
+          left join streamer on streamer.id = event_streamer.streamer_id
+          where event_streamer.event_id = (select id from event order by event_start desc limit 1)
+          order by event_streamer.start_time;`
+  );
+  return(records);
+}
+
 async function getStreamersByEventId(eventId) {
   const records = await db.query(
     `select distinct s.username
@@ -41,6 +52,7 @@ async function getMediaByEventId(eventId) {
 
 module.exports = {
   getCurrentEvent,
+  getCurrentEventSchedule,
   getEventById,
   getEvents,
   getMediaByEventId,
