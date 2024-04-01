@@ -27,8 +27,18 @@ async function updateText(req, res, next) {
   }
 }
 
+async function updateChecklist(req, res, next) {
+  try {
+    res.json(await signupService.updateChecklist(req.user.username, JSON.stringify(req.body)));
+  } catch (err) {
+    console.error('Error in signup.controller updateChecklist.', err.message);
+    next(err);
+  }
+}
+
 module.exports = {
   get,
   updateSchedule,
-  updateText
+  updateText,
+  updateChecklist,
 }

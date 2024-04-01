@@ -9,4 +9,6 @@ router.put('/schedule', twitchAuth, signupController.updateSchedule);
 
 router.put('/text', twitchAuth, signupController.updateText);
 
+router.put('/checklist', twitchAuth, signupController.updateChecklist);
+
 module.exports = router;
