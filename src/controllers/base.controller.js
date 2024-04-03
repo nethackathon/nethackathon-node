@@ -46,7 +46,10 @@ async function fetchText(url) {
   return response.data
 }
 
-async function getHardfoughtLiveLog(req, res, next) {
+let lastLivelogFetch = 0;
+let livelogMemo = [];
+
+async function fetchLiveLog() {
   try {
     const livelogURLs = [
       'https://www.hardfought.org/xlogfiles/nethackathon/livelog',
@@ -63,44 +66,22 @@ async function getHardfoughtLiveLog(req, res, next) {
         output.push({message: `${l[2]} (${l[3]} ${l[4]} ${l[5]} ${l[6]}) ${l[9]}, on T:${l[7]}`, time: logTime, type: l[1]});
       }
     });
-    return res.json(output);
-  } catch (err) {
-    console.error('Error in base.controller getHardfoughtLiveLog.', err.message);
-    next(err);
-  }
+    livelogMemo = output;
+    lastLivelogFetch = Date.now();
+  } catch (err) {}
 }
 
-async function getLiveLog(req, res, next) {
-  try {
-    let curTime = req.query['curtime'];
-    if (curTime !== undefined) curTime = parseInt(curTime);
-
-    const livelogPath = path.join(__dirname, '..', '..', 'livelog');
-    exec(`tail -n ${livelogLines} ${livelogPath}`, (error, stdout, stderr) => {
-      const output = [];
-      const lines = stdout.split('\n');
-      lines.forEach((line) => {
-        const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
-        if (l && l.length > 7) {
-          const logTime = parseInt(l[8]);
-          // if curtime query string
-          if (curTime === undefined || logTime > curTime) {
-            output.push({message: `${l[2]} (${l[3]} ${l[4]} ${l[5]} ${l[6]}) ${l[9]}, on T:${l[7]}`, time: logTime, type: l[1]});
-          }
-        }
-      });
-      /*
-      lltype=16384    name=nethackathon       role=Ran        race=Elf        gender=Fem      align=Cha       turns=375       starttime=1649709862    curtime=1649711620      message=killed by a hallucinogen-distorted coyote
-      wispofvapor (Sam Hum Fem Law) entered Gehennom, on T:35598
-       */
-      return res.json(output);
-    })
-  } catch (err) {
-    console.error('Error in base.controller getLiveLog.', err.message);
-    next(err);
+async function getHardfoughtLiveLog(req, res, next) {
+  if (Date.now() - lastLivelogFetch > 5000) {
+    await fetchLiveLog();
   }
+  return res.json(livelogMemo);
 }
-async function getHardfoughtEndedGames(req, res, next) {
+
+let lastEndedGamesFetch = 0;
+let endedGamesMemo = [];
+
+async function fetchEndedGames() {
   try {
     const livelogURLs = [
       'https://www.hardfought.org/xlogfiles/nethackathon/xlogfile',
@@ -122,37 +103,16 @@ async function getHardfoughtEndedGames(req, res, next) {
         output.push({message: `${varObj['name']} (${varObj['role']} ${varObj['race']} ${varObj['gender']} ${varObj['align']}) ${varObj['death']}, on T:${varObj['turns']}`, time: logTime, type: 16384});
       }
     });
-    return res.json(output);
-  } catch (err) {
-    console.error('Error in base.controller getHardfoughtEndedGames.', err.message);
-    next(err);
-  }
+    endedGamesMemo = output;
+    lastEndedGamesFetch = Date.now();
+  } catch (err) {}
 }
 
-async function getEndedGames(req, res, next) {
-  try {
-    const livelogPath = path.join(__dirname, '..', '..', 'xlogfile');
-    exec(`tail ${livelogPath}`, (error, stdout, stderr) => {
-      const output = [];
-      const lines = stdout.split('\n');
-      lines.forEach((line) => {
-        if (line.length > 0) {
-          const vars = line.split(/\s{4}|\t/)
-          const varObj = {}
-          vars.forEach((v) => {
-            let varr = v.split(/=/)
-            varObj[varr[0]] = varr[1]
-          })
-          const logTime = parseInt(varObj['endtime']);
-          output.push({message: `${varObj['name']} (${varObj['role']} ${varObj['race']} ${varObj['gender']} ${varObj['align']}) ${varObj['death']}, on T:${varObj['turns']}`, time: logTime, type: 16384});
-        }
-      });
-      return res.json(output);
-    })
-  } catch (err) {
-    console.error('Error in base.controller getLiveLog.', err.message);
-    next(err);
+async function getHardfoughtEndedGames(req, res, next) {
+  if (Date.now() - lastEndedGamesFetch > 5000) {
+    await fetchEndedGames();
   }
+  return res.json(endedGamesMemo);
 }
 
 module.exports = {
@@ -160,8 +120,6 @@ module.exports = {
   getStreamers,
   getStreamersSchedule,
   getHardfoughtLiveLog,
-  getLiveLog,
   getHardfoughtEndedGames,
-  getEndedGames,
-  getSchedule
+  getSchedule,
 }
