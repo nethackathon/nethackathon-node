@@ -46,6 +46,7 @@ const streamerRouter = require('./src/routes/streamer.routes');
 const sokobanRouter = require('./src/routes/sokoban.routes');
 const twitchRouter = require('./src/routes/twitch.routes');
 const eventRouter = require('./src/routes/event.routes');
+const charityRouter = require('./src/routes/charity.routes');
 
 app.use('/', baseRouter);
 app.use('/annotate', annotateRouter);
@@ -55,6 +56,7 @@ app.use('/streamer', streamerRouter);
 app.use('/sokoban', sokobanRouter);
 app.use('/twitch', twitchRouter);
 app.use('/event', eventRouter);
+app.use('/charity', charityRouter);
 
 app.listen(port, async () => {
   console.log(`annotate app listening at https://nethackathon.org:${port}`);
