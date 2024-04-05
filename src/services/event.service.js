@@ -11,11 +11,24 @@ async function getEvents() {
 }
 
 async function getCurrentEvent() {
-  // TODO: Add event_charity table and join here
   const records = await db.query(
-    `select *, null as charity from event
-      order by event_start
-      desc limit 1;`
+    `select e.*,
+         c.charity_name, c.charity_description, c.charity_url, c.giving_url
+         from event e
+         left join event_charity c on c.event_id = e.id
+         order by e.event_start desc
+         limit 1;`
+  );
+  return(records[0]);
+}
+
+async function getLastEvent() {
+  const records = await db.query(
+    `select e.*
+         from event e
+         where e.event_start < (select max(event_start) from event)
+         order by e.event_start desc
+         limit 1;`
   );
   return(records[0]);
 }
@@ -55,6 +68,7 @@ module.exports = {
   getCurrentEventSchedule,
   getEventById,
   getEvents,
+  getLastEvent,
   getMediaByEventId,
   getStreamersByEventId,
 }
