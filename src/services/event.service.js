@@ -63,6 +63,17 @@ async function getMediaByEventId(eventId) {
   return(records);
 }
 
+async function getScheduleByEventId(eventId) {
+  const records = await db.query(
+    `select streamer.username, event_streamer.start_time, event_streamer.end_time, event_streamer.notes
+          from event_streamer
+          left join streamer on streamer.id = event_streamer.streamer_id
+          where event_streamer.event_id = ?
+          order by event_streamer.start_time;`
+  ,[eventId]);
+  return(records);
+}
+
 module.exports = {
   getCurrentEvent,
   getCurrentEventSchedule,
@@ -70,5 +81,6 @@ module.exports = {
   getEvents,
   getLastEvent,
   getMediaByEventId,
+  getScheduleByEventId,
   getStreamersByEventId,
 }

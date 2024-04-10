@@ -73,6 +73,17 @@ async function getMediaByEventId(req, res, next) {
   }
 }
 
+async function getScheduleByEventId(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const returnData = await eventService.getScheduleByEventId(eventId);
+    res.json({schedule: returnData});
+  } catch (err) {
+    console.error('Error in event.controller getScheduleByEventId.', err.message);
+    next(err);
+  }
+}
+
 module.exports = {
   getCurrentEvent,
   getCurrentEventSchedule,
@@ -80,5 +91,6 @@ module.exports = {
   getEvents,
   getLastEvent,
   getMediaByEventId,
+  getScheduleByEventId,
   getStreamersByEventId,
 }
