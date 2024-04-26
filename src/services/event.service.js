@@ -57,7 +57,10 @@ async function getStreamersByEventId(eventId) {
 
 async function getMediaByEventId(eventId) {
   const records = await db.query(
-    'select * from event_media where event_id = ? order by start_time;',
+    `select * from event_media
+     where admin_verified = 1
+       and event_id = ?
+     order by start_time;`,
     [eventId]
   );
   return(records);
