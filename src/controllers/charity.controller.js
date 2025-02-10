@@ -9,12 +9,10 @@ async function fetchCharityProgress() {
     const currentCharity = await charityService.getCurrentCharity();
     if (!currentCharity || !currentCharity.api_endpoint)
       return;
-    console.log('fetching charity progress from', currentCharity.api_endpoint);
     const response = await axios.get(currentCharity.api_endpoint);
-    console.log('response', response);
     charityProgressMemo = response.data
     lastCharityProgressFetch = Date.now();
-  } catch (err) {}
+  } catch (err) { }
 }
 
 async function getCharityProgress(req, res, next) {
