@@ -1,0 +1,2 @@
+insert into event_media (event_id, media_type, video_type, platform, media_url, title, description, start_time, end_time)
+values (6, 'playlist', 'full_segment', 'youtube', 'https://youtube.com/playlist?list=PLChC_Y8sQL202DrT0rgPQj3VhzlQ4U2p1', 'Streamer Segments Compilation: YouTube Playlist', 'On April 5 - 7, 2024, twenty-six Twitch content creators streamed NetHack continuously for over 60 hours!', '2024-04-05 12:00:00', '2024-04-08 03:00:00');

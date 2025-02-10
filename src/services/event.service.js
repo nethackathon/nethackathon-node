@@ -2,12 +2,31 @@ const db = require('./db.service')
 
 async function getEventById(eventId) {
   const records = await db.query('select * from event where id = ?;', [eventId]);
-  return([records]);
+  return ([records]);
 }
 
 async function getEvents() {
-  const records = await db.query('select * from event order by event_start;');
-  return(records);
+  const records = await db.query(`
+    select e.*, (select count(*) from event_streamer where signed_up = 1 and event_id = e.id) as streamer_count
+      from event e order by event_start;`);
+  return records;
+}
+
+async function createEvent(title, signup_start, signup_end, event_start, event_end) {
+  const records = await db.query(`
+    insert into event (title, signup_start, signup_end, event_start, event_end)
+      values (?,?,?,?,?);`,
+    [title, signup_start, signup_end, event_start, event_end]);
+  return records;
+}
+
+async function updateEvent(eventId, title, signup_start, signup_end, event_start, event_end) {
+  const records = await db.query(`
+    update event
+      set title = ?, signup_start = ?, signup_end = ?, event_start = ?, event_end = ?
+      where id = ?;`,
+    [title, signup_start, signup_end, event_start, event_end, eventId]);
+  return records;
 }
 
 async function getCurrentEvent() {
@@ -19,7 +38,7 @@ async function getCurrentEvent() {
          order by e.event_start desc
          limit 1;`
   );
-  return(records[0]);
+  return (records[0]);
 }
 
 async function getLastEvent() {
@@ -30,18 +49,18 @@ async function getLastEvent() {
          order by e.event_start desc
          limit 1;`
   );
-  return(records[0]);
+  return (records[0]);
 }
 
 async function getCurrentEventSchedule() {
   const records = await db.query(
-    `select streamer.username, event_streamer.start_time, event_streamer.end_time, event_streamer.notes
-          from event_streamer
-          left join streamer on streamer.id = event_streamer.streamer_id
-          where event_streamer.event_id = (select id from event order by event_start desc limit 1)
-          order by event_streamer.start_time;`
+    `select streamer.username, event_schedule.start_time, event_schedule.end_time, event_schedule.notes
+          from event_schedule
+          left join streamer on streamer.id = event_schedule.streamer_id
+          where event_schedule.event_id = (select id from event order by event_start desc limit 1)
+          order by event_schedule.start_time;`
   );
-  return(records);
+  return (records);
 }
 
 async function getStreamersByEventId(eventId) {
@@ -50,9 +69,10 @@ async function getStreamersByEventId(eventId) {
       from event_streamer es
       left join streamer s on s.id = es.streamer_id
       where es.event_id = ?
+      and es.signed_up = 1
       order by s.username;`,
-  [eventId]);
-  return(records.map(o => o.username));
+    [eventId]);
+  return (records.map(o => o.username));
 }
 
 async function getMediaByEventId(eventId) {
@@ -63,18 +83,18 @@ async function getMediaByEventId(eventId) {
      order by start_time;`,
     [eventId]
   );
-  return(records);
+  return (records);
 }
 
 async function getScheduleByEventId(eventId) {
   const records = await db.query(
-    `select streamer.username, event_streamer.start_time, event_streamer.end_time, event_streamer.notes
-          from event_streamer
-          left join streamer on streamer.id = event_streamer.streamer_id
-          where event_streamer.event_id = ?
-          order by event_streamer.start_time;`
-  ,[eventId]);
-  return(records);
+    `select streamer.username, event_schedule.start_time, event_schedule.end_time, event_schedule.notes
+          from event_schedule
+          left join streamer on streamer.id = event_schedule.streamer_id
+          where event_schedule.event_id = ?
+          order by event_schedule.start_time;`
+    , [eventId]);
+  return (records);
 }
 
 module.exports = {
@@ -86,4 +106,6 @@ module.exports = {
   getMediaByEventId,
   getScheduleByEventId,
   getStreamersByEventId,
+  createEvent,
+  updateEvent,
 }

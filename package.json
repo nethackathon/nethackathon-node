@@ -19,8 +19,9 @@
     "express-session": "^1.17.2",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "luxon": "^3.5.0",
     "morgan": "^1.10.0",
-    "mysql2": "^2.3.3",
+    "mysql2": "^3.9.4",
     "passport": "^0.6.0",
     "passport-http-bearer": "^1.0.1",
     "passport-openidconnect": "^0.1.1"

@@ -11,7 +11,8 @@ async function get(req, res, next) {
 
 async function updateSchedule(req, res, next) {
   try {
-    res.json(await signupService.updateSchedule(req.user.username, JSON.stringify(req.body)));
+    const { eventId, schedule } = req.body;
+    res.json(await signupService.updateSchedule(req.user.username, eventId, JSON.stringify(schedule)));
   } catch (err) {
     console.error('Error in signup.controller updateSchedule.', err.message);
     next(err);
@@ -20,16 +21,17 @@ async function updateSchedule(req, res, next) {
 
 async function updateText(req, res, next) {
   try {
-    res.json(await signupService.updateText(req.user.username, req.body.notes, req.body.discordUsername, req.body.pronouns, req.body.slotLength));
+    res.json(await signupService.updateText(req.user.username, req.body.eventId, req.body.signedUp, req.body.notes, req.body.discordUsername, req.body.pronouns, req.body.slotLength));
   } catch (err) {
-    console.error('Error in sokoban.controller getTurns.', err.message);
+    console.error('Error in signup.controller updateText.', err.message);
     next(err);
   }
 }
 
 async function updateChecklist(req, res, next) {
   try {
-    res.json(await signupService.updateChecklist(req.user.username, JSON.stringify(req.body)));
+    const { eventId, checklist } = req.body;
+    res.json(await signupService.updateChecklist(req.user.username, eventId, JSON.stringify(checklist)));
   } catch (err) {
     console.error('Error in signup.controller updateChecklist.', err.message);
     next(err);

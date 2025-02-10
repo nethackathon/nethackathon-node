@@ -1,0 +1,1 @@
+ALTER TABLE streamer ADD COLUMN is_admin BOOLEAN DEFAULT false;

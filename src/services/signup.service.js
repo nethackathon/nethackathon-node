@@ -2,16 +2,20 @@ const db = require('./db.service')
 
 async function get(username) {
   const [record] = await db.query(
-    `SELECT s.pronouns, s.schedule, s.discord_username, s.notes, s.slot_length, s.checklist,
-     es.start_time, es.end_time, es.survey,
+    `SELECT s.pronouns, s.discord_username, s.notes, s.slot_length, s.is_admin,
+     esch.start_time, esch.end_time,
+     es.survey, es.signed_up, es.schedule, es.checklist,
         (select ns.username
-         from event_streamer nes
+         from event_schedule nes
          left join streamer ns on ns.id = nes.streamer_id
-         where nes.start_time = es.end_time) as next_streamer
+         where nes.start_time = esch.end_time) as next_streamer
      from streamer s
      left join event_streamer es
                on s.id = es.streamer_id
                and es.event_id = (select id from event order by event_start desc limit 1)
+     left join event_schedule esch
+               on s.id = esch.streamer_id
+               and esch.event_id = (select id from event order by event_start desc limit 1)
      where s.username = ?;`,
     [username]
   );
@@ -27,22 +31,40 @@ async function get(username) {
     nextStreamer: record?.next_streamer ?? '',
     checklist: record?.checklist ?? '{}',
     survey: record?.survey ?? '{}',
+    signedUp: record?.signed_up ?? false,
+    isAdmin: record?.is_admin ?? false,
   }
 }
 
-async function updateSchedule(username, schedule) {
-  return await db.query("UPDATE streamer set schedule = ? where username = ?;",
-    [schedule, username]);
+async function updateSchedule(username, eventId, schedule) {
+  return await db.query(`
+    INSERT INTO event_streamer (event_id, streamer_id, schedule)
+        VALUES (?, (SELECT id FROM streamer WHERE username = ?), ?)
+        ON DUPLICATE KEY UPDATE schedule = ?;`,
+    [eventId, username, schedule, schedule]);
 }
 
-async function updateText(username, notes, discordUsername, pronouns, slotLength) {
-  return await db.query("UPDATE streamer set pronouns = ?, notes = ?, discord_username = ?, slot_length = ? where username = ?;",
-    [pronouns, notes, discordUsername, slotLength, username]);
+async function updateText(username, eventId, signedUp, notes, discordUsername, pronouns, slotLength) {
+  return await db.transactQueries([
+    {
+      sql: "UPDATE streamer set pronouns = ?, notes = ?, discord_username = ?, slot_length = ? where username = ?;",
+      params: [pronouns, notes, discordUsername, slotLength, username]
+    },
+    {
+      sql: `INSERT INTO event_streamer (event_id, streamer_id, signed_up)
+              VALUES (?, (SELECT id FROM streamer WHERE username = ?), ?)
+              ON DUPLICATE KEY UPDATE signed_up = ?;`,
+      params: [eventId, username, signedUp, signedUp]
+    }
+  ]);
 }
 
-async function updateChecklist(username, checklist) {
-  return await db.query("UPDATE streamer set checklist = ? where username = ?;",
-    [checklist, username]);
+async function updateChecklist(username, eventId, checklist) {
+  return await db.query(`
+    UPDATE event_streamer set checklist = ?
+    where event_id = ?
+    and streamer_id = (select id from streamer where username = ?);`,
+    [checklist, eventId, username]);
 }
 
 async function updateSurvey(username, survey) {
