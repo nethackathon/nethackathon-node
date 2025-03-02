@@ -108,6 +108,40 @@ async function updateEvent(req, res, next) {
   }
 }
 
+async function getStreamersScheduleByEventId(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const returnData = await eventService.getStreamersScheduleByEventId(eventId);
+    res.json({ streamers: returnData });
+  } catch (err) {
+    console.error('Error in event.controller getStreamersScheduleByEventId.', err.message);
+    next(err);
+  }
+}
+
+async function updateEventSchedule(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const { schedule } = req.body;
+    await eventService.updateEventSchedule(eventId, schedule);
+    res.json({ message: 'Schedule updated successfully' });
+  } catch (err) {
+    console.error('Error in event.controller updateEventSchedule.', err.message);
+    next(err);
+  }
+}
+
+async function toggleEventSchedulePublished(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    await eventService.toggleEventSchedulePublished(eventId);
+    res.json({ message: 'Schedule published/unpublished successfully' });
+  } catch (err) {
+    console.error('Error in event.controller toggleEventSchedulePublished.', err.message);
+    next(err);
+  }
+}
+
 module.exports = {
   createEvent,
   getCurrentEvent,
@@ -118,5 +152,8 @@ module.exports = {
   getMediaByEventId,
   getScheduleByEventId,
   getStreamersByEventId,
+  getStreamersScheduleByEventId,
+  toggleEventSchedulePublished,
   updateEvent,
+  updateEventSchedule,
 }

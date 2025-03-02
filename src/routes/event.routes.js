@@ -11,8 +11,11 @@ router.get('/:eventId', eventController.getEventById);
 router.get('/:eventId/streamers', eventController.getStreamersByEventId);
 router.get('/:eventId/schedule', eventController.getScheduleByEventId);
 router.get('/:eventId/media', eventController.getMediaByEventId);
+router.get('/:eventId/streamers/schedule', eventController.getStreamersScheduleByEventId);
 
+router.put('/:eventId/schedule', twitchAuth, adminMiddleware, eventController.updateEventSchedule);
 router.post('/', twitchAuth, adminMiddleware, eventController.createEvent);
 router.patch('/', twitchAuth, adminMiddleware, eventController.updateEvent);
+router.put('/:eventId/schedule/publish', twitchAuth, adminMiddleware, eventController.toggleEventSchedulePublished);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const db = require('./db.service')
+const { convertToSqlDateTime } = require('../utils/utils')
 
 async function getEventById(eventId) {
   const records = await db.query('select * from event where id = ?;', [eventId]);
@@ -97,7 +98,42 @@ async function getScheduleByEventId(eventId) {
   return (records);
 }
 
+async function updateEventSchedule(event_id, schedule) {
+  const insertQueries = schedule.map(s => ({
+    sql: "INSERT INTO event_schedule (event_id, streamer_id, start_time, end_time, notes) VALUES (?, (select id from streamer where username = ?), ?, ?, ?);",
+    params: [event_id, s.username, convertToSqlDateTime(s.start_time), convertToSqlDateTime(s.end_time), s.notes]
+  }));
+  await db.transactQueries([
+    {
+      sql: "DELETE FROM event_schedule WHERE event_id = ?;",
+      params: [event_id]
+    },
+    ...insertQueries,
+  ])
+}
+
+async function toggleEventSchedulePublished(eventId) {
+  const records = await db.query(`
+    UPDATE event
+      SET schedule_published = NOT schedule_published
+      WHERE id = ?;`,
+    [eventId]);
+}
+
+async function getStreamersScheduleByEventId(eventId) {
+  const records = await db.query(`
+    SELECT s.username, s.slot_length, es.schedule
+      from event_streamer es
+      left join streamer s
+        on s.id = es.streamer_id
+        where es.event_id = ?
+        and es.signed_up = 1;`,
+    [eventId]);
+  return (records);
+}
+
 module.exports = {
+  createEvent,
   getCurrentEvent,
   getCurrentEventSchedule,
   getEventById,
@@ -106,6 +142,8 @@ module.exports = {
   getMediaByEventId,
   getScheduleByEventId,
   getStreamersByEventId,
-  createEvent,
+  getStreamersScheduleByEventId,
+  toggleEventSchedulePublished,
   updateEvent,
+  updateEventSchedule,
 }

@@ -1,0 +1,1 @@
+ALTER TABLE event ADD COLUMN schedule_published BOOLEAN DEFAULT FALSE;
