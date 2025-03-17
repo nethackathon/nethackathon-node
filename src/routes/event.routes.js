@@ -13,6 +13,7 @@ router.get('/:eventId/schedule', eventController.getScheduleByEventId);
 router.get('/:eventId/media', eventController.getMediaByEventId);
 router.get('/:eventId/streamers/schedule', eventController.getStreamersScheduleByEventId);
 
+router.get('/:eventId/participants', twitchAuth, adminMiddleware, eventController.getParticipantsByEventId);
 router.put('/:eventId/schedule', twitchAuth, adminMiddleware, eventController.updateEventSchedule);
 router.post('/', twitchAuth, adminMiddleware, eventController.createEvent);
 router.patch('/', twitchAuth, adminMiddleware, eventController.updateEvent);

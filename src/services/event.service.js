@@ -132,6 +132,18 @@ async function getStreamersScheduleByEventId(eventId) {
   return (records);
 }
 
+async function getParticipantsByEventId(eventId) {
+  const records = await db.query(`
+    select s.username, s.pronouns, s.slot_length, s.discord_username, s.notes, s.is_admin, 
+    es.checklist, es.signed_up, length(es.schedule) as schedule_length
+    from event_streamer es
+    left join streamer s on s.id = es.streamer_id
+    where es.event_id = ?;
+    `,
+    [eventId]);
+  return (records);
+}
+
 module.exports = {
   createEvent,
   getCurrentEvent,
@@ -140,6 +152,7 @@ module.exports = {
   getEvents,
   getLastEvent,
   getMediaByEventId,
+  getParticipantsByEventId,
   getScheduleByEventId,
   getStreamersByEventId,
   getStreamersScheduleByEventId,

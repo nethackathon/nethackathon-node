@@ -142,6 +142,17 @@ async function toggleEventSchedulePublished(req, res, next) {
   }
 }
 
+async function getParticipantsByEventId(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const returnData = await eventService.getParticipantsByEventId(eventId);
+    res.json({ participants: returnData });
+  } catch (err) {
+    console.error('Error in event.controller getParticipantsByEventId.', err.message);
+    next(err);
+  }
+}
+
 module.exports = {
   createEvent,
   getCurrentEvent,
@@ -150,6 +161,7 @@ module.exports = {
   getEvents,
   getLastEvent,
   getMediaByEventId,
+  getParticipantsByEventId,
   getScheduleByEventId,
   getStreamersByEventId,
   getStreamersScheduleByEventId,
