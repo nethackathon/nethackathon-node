@@ -108,6 +108,19 @@ async function updateEvent(req, res, next) {
   }
 }
 
+async function updateEventCharity(req, res, next) {
+  try {
+    const eventId = req.params.eventId;
+    const { charity_name, charity_description, charity_url, giving_url, api_endpoint } = req.body;
+    console.log('req.body', req.body);
+    const returnData = await eventService.updateEventCharity(eventId, charity_name, charity_description, charity_url, giving_url, api_endpoint);
+    res.json({ event: returnData });
+  } catch (err) {
+    console.error('Error in event.controller updateEventCharity.', err.message);
+    next(err);
+  }
+}
+
 async function getStreamersScheduleByEventId(req, res, next) {
   try {
     const eventId = req.params.eventId;
@@ -168,4 +181,5 @@ module.exports = {
   toggleEventSchedulePublished,
   updateEvent,
   updateEventSchedule,
+  updateEventCharity,
 }

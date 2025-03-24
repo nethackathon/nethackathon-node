@@ -18,5 +18,6 @@ router.put('/:eventId/schedule', twitchAuth, adminMiddleware, eventController.up
 router.post('/', twitchAuth, adminMiddleware, eventController.createEvent);
 router.patch('/', twitchAuth, adminMiddleware, eventController.updateEvent);
 router.put('/:eventId/schedule/publish', twitchAuth, adminMiddleware, eventController.toggleEventSchedulePublished);
+router.put('/:eventId/charity', twitchAuth, adminMiddleware, eventController.updateEventCharity);
 
-module.exports = router;
+module.exports = router

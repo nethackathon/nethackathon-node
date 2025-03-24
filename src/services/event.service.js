@@ -8,8 +8,11 @@ async function getEventById(eventId) {
 
 async function getEvents() {
   const records = await db.query(`
-    select e.*, (select count(*) from event_streamer where signed_up = 1 and event_id = e.id) as streamer_count
-      from event e order by event_start;`);
+    select e.*, (select count(*) from event_streamer where signed_up = 1 and event_id = e.id) as streamer_count,
+    c.charity_name, c.charity_description, c.charity_url, c.giving_url, c.api_endpoint
+      from event e
+      left join event_charity c on c.event_id = e.id
+      order by event_start;`);
   return records;
 }
 
@@ -27,6 +30,20 @@ async function updateEvent(eventId, title, signup_start, signup_end, event_start
       set title = ?, signup_start = ?, signup_end = ?, event_start = ?, event_end = ?
       where id = ?;`,
     [title, signup_start, signup_end, event_start, event_end, eventId]);
+  return records;
+}
+
+async function updateEventCharity(eventId, charity_name, charity_description, charity_url, giving_url, api_endpoint) {
+  const records = await db.query(`
+    INSERT INTO event_charity (event_id, charity_name, charity_description, charity_url, giving_url, api_endpoint)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      charity_name = VALUES(charity_name),
+      charity_description = VALUES(charity_description),
+      charity_url = VALUES(charity_url),
+      giving_url = VALUES(giving_url),
+      api_endpoint = VALUES(api_endpoint);`,
+    [eventId, charity_name, charity_description, charity_url, giving_url, api_endpoint]);
   return records;
 }
 
@@ -158,5 +175,6 @@ module.exports = {
   getStreamersScheduleByEventId,
   toggleEventSchedulePublished,
   updateEvent,
+  updateEventCharity,
   updateEventSchedule,
 }
