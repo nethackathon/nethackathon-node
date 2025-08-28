@@ -2,7 +2,6 @@ const baseService = require('../services/base.service');
 const { exec } = require('child_process');
 const path = require('path');
 const schedule = require('../data/current-schedule');
-const axios = require('axios');
 const livelogLines = (process.env.LIVELOG_LINES) ? (process.env.LIVELOG_LINES) : 100
 
 async function getTagline(req, res, next) {
@@ -42,8 +41,8 @@ async function getSchedule(req, res, next) {
 }
 
 async function fetchText(url) {
-  const response = await axios.get(url);
-  return response.data
+  const response = await fetch(url);
+  return await response.text();
 }
 
 let lastLivelogFetch = 0;

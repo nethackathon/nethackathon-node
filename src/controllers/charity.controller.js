@@ -1,5 +1,4 @@
 const charityService = require('../services/charity.service');
-const axios = require('axios');
 
 let lastCharityProgressFetch = 0;
 let charityProgressMemo = {};
@@ -9,8 +8,8 @@ async function fetchCharityProgress() {
     const currentCharity = await charityService.getCurrentCharity();
     if (!currentCharity || !currentCharity.api_endpoint)
       return;
-    const response = await axios.get(currentCharity.api_endpoint);
-    charityProgressMemo = response.data
+    const response = await fetch(currentCharity.api_endpoint);
+    charityProgressMemo = await response.json();
     lastCharityProgressFetch = Date.now();
   } catch (err) { }
 }
