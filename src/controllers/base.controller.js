@@ -38,16 +38,26 @@ async function getSchedule(req, res, next) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, {
-    timeout: 3000, // 3 second timeout
-    headers: {
-      'User-Agent': 'nethackathon-node/1.0'
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+  
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'nethackathon-node/1.0'
+      }
+    });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
     }
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
+    return await response.text();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-  return await response.text();
 }
 
 let lastLivelogFetch = 0;
