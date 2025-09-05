@@ -1,8 +1,5 @@
 const baseService = require('../services/base.service');
-const { exec } = require('child_process');
-const path = require('path');
 const schedule = require('../data/current-schedule');
-const livelogLines = (process.env.LIVELOG_LINES) ? (process.env.LIVELOG_LINES) : 100
 
 async function getTagline(req, res, next) {
   try {
@@ -41,7 +38,15 @@ async function getSchedule(req, res, next) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    timeout: 3000, // 3 second timeout
+    headers: {
+      'User-Agent': 'nethackathon-node/1.0'
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
+  }
   return await response.text();
 }
 
@@ -55,9 +60,22 @@ async function fetchLiveLog() {
       'https://eu.hardfought.org/xlogfiles/nethackathon/livelog',
       'https://au.hardfought.org/xlogfiles/nethackathon/livelog',
     ];
-    const combinedText = await Promise.all(livelogURLs.map(fetchText));
+    
+    // Fetch from URLs individually, skip ones that fail
+    const textResults = [];
+    for (const url of livelogURLs) {
+      try {
+        const text = await fetchText(url);
+        textResults.push(text);
+        console.log(`Successfully fetched livelog from: ${url}`);
+      } catch (err) {
+        console.log(`Skipping ${url} (not available yet): ${err.message}`);
+        // Don't add to textResults, just skip this URL
+      }
+    }
+    
     const output = [];
-    const lines = combinedText.join('').split('\n');
+    const lines = textResults.join('').split('\n');
     lines.forEach((line) => {
       const l = line.match(/lltype=(\w+).*name=(\w+).*role=(\w+).*race=(\w+).*gender=(\w+).*align=(\w+).*turns=(\w+).*curtime=(\w+).*message=(.*)/)
       if (l && l.length > 7) {
@@ -67,7 +85,10 @@ async function fetchLiveLog() {
     });
     livelogMemo = output;
     lastLivelogFetch = Date.now();
-  } catch (err) {}
+    console.log(`fetchLiveLog completed, found ${output.length} entries from ${textResults.length} sources`);
+  } catch (err) {
+    console.error('Error in fetchLiveLog:', err.message, err);
+  }
 }
 
 async function getHardfoughtLiveLog(req, res, next) {
@@ -80,6 +101,7 @@ async function getHardfoughtLiveLog(req, res, next) {
 let lastEndedGamesFetch = 0;
 let endedGamesMemo = [];
 
+
 async function fetchEndedGames() {
   try {
     const livelogURLs = [
@@ -87,9 +109,22 @@ async function fetchEndedGames() {
       'https://eu.hardfought.org/xlogfiles/nethackathon/xlogfile',
       'https://au.hardfought.org/xlogfiles/nethackathon/xlogfile',
     ];
-    const combinedText = await Promise.all(livelogURLs.map(fetchText));
+    
+    // Fetch from URLs individually, skip ones that fail
+    const textResults = [];
+    for (const url of livelogURLs) {
+      try {
+        const text = await fetchText(url);
+        textResults.push(text);
+        console.log(`Successfully fetched xlogfile from: ${url}`);
+      } catch (err) {
+        console.log(`Skipping ${url} (not available yet): ${err.message}`);
+        // Don't add to textResults, just skip this URL
+      }
+    }
+    
     const output = [];
-    const lines = combinedText.join('').split('\n');
+    const lines = textResults.join('').split('\n');
     lines.forEach((line) => {
       if (line.length > 0) {
         const vars = line.split(/\s{4}|\t/)
@@ -104,9 +139,11 @@ async function fetchEndedGames() {
     });
     endedGamesMemo = output;
     lastEndedGamesFetch = Date.now();
-  } catch (err) {}
+    console.log(`fetchEndedGames completed, found ${output.length} entries from ${textResults.length} sources`);
+  } catch (err) {
+    console.error('Error in fetchEndedGames:', err.message, err);
+  }
 }
-
 async function getHardfoughtEndedGames(req, res, next) {
   if (Date.now() - lastEndedGamesFetch > 5000) {
     await fetchEndedGames();
